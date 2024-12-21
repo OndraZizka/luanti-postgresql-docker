@@ -16,7 +16,7 @@ services:
       - ./minetest-data:/config/.minetest
     ports:
       - 30000:30000/udp
-    restart: unless-stopped
+    #restart: unless-stopped
     depends_on:
       - postgres
 
@@ -32,25 +32,27 @@ services:
       - ./minetest-data:/config/.minetest
     ports:
       - 30000:30000/udp
-    restart: unless-stopped
+    restart: no
     depends_on:
       - postgres
 
 
   postgres:
     container_name: minetest-postgres
-    image: postgres:17
-    shm_size: 128mb
+    #image: postgres:17
+    image: mypostgres:latest
     environment:
       #- POSTGRES_PASSWORD=minetest-pass
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: minetest-pass
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
       #- POSTGRES_PASSWORD_FILE=/run/secrets/postgres-passwd
       #- POSTGRES_PASSWORD_FILE=/postgres-passwd.txt
+      #POSTGRES_PASSWORD_FILE: /postgres-passwd.txt
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
       - ./postgres-listenall.conf:/etc/postgresql/postgresql.conf
-      - ./postgres-passwd.txt:/postgres-passwd.txt
+      #- ./postgres-passwd.txt:/postgres-passwd.txt
     ports:
       - 5432:5432
     healthcheck:
@@ -58,6 +60,7 @@ services:
       interval: 1s
       timeout: 5s
       retries: 10
+    shm_size: 128mb
     
 
 x-shared-minetest:
