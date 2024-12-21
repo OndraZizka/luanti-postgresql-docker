@@ -1,0 +1,75 @@
+---
+services:
+
+  mynetest:
+    profiles: ["minetest-adjusted"]
+    build:
+      dockerfile: foo.dockerfile
+    image: mynetest
+    container_name: mynetest
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - "CLI_ARGS=--gameid devtest" #optional
+    volumes:
+      - ./minetest-data:/config/.minetest
+    ports:
+      - 30000:30000/udp
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+  minetest:
+    container_name: minetest
+    image: lscr.io/linuxserver/minetest:latest
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Etc/UTC
+      CLI_ARGS: "--gameid devtest"
+    volumes:
+      - ./minetest-data:/config/.minetest
+    ports:
+      - 30000:30000/udp
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+
+  postgres:
+    container_name: minetest-postgres
+    image: postgres:17
+    shm_size: 128mb
+    environment:
+      #- POSTGRES_PASSWORD=minetest-pass
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: minetest-pass
+      #- POSTGRES_PASSWORD_FILE=/run/secrets/postgres-passwd
+      #- POSTGRES_PASSWORD_FILE=/postgres-passwd.txt
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+      - ./postgres-listenall.conf:/etc/postgresql/postgresql.conf
+      - ./postgres-passwd.txt:/postgres-passwd.txt
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    
+
+x-shared-minetest:
+  environment:
+    - PUID=1000
+    - PGID=1000
+    - TZ=Etc/UTC
+    - "CLI_ARGS=--gameid devtest" #optional
+  volumes:
+    - ./minetest-data:/config/.minetest
+  ports:
+    - 30000:30000/udp
+  restart: unless-stopped
+  depends_on:
+    - postgres
