@@ -1,5 +1,7 @@
 
-# Running Luanti (Minetest) in docker with postgreSQL datanase.
+# Running Luanti (Minetest) in docker with PostgreSQL database.
+
+This is work in progress; with some manual work described below, it works.
 
 
 ## PostgreSQL
