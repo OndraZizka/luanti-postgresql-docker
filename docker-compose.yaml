@@ -4,7 +4,7 @@ services:
   mynetest:
     profiles: ["minetest-adjusted"]
     build:
-      dockerfile: myMinetest.dockerfile
+      dockerfile: luanti-boot-image/myMinetest.dockerfile
     image: mynetest
     container_name: mynetest
     environment:
@@ -20,19 +20,19 @@ services:
     depends_on:
       - postgres
 
-  minetest:
-    container_name: minetest
+  luanti-bare:
+    container_name: luanti-bare
     image: lscr.io/linuxserver/minetest:latest
     environment:
       PUID: 1000
       PGID: 1000
       TZ: Etc/UTC
       #CLI_ARGS: "--gameid devtest"   ## This worked, created a world.
-      #CLI_ARGS: "--gameid mineclonia --migrate postgres"
+      #CLI_ARGS: "--gameid mineclonia --migrate postgres"  ## Nope.
       CLI_ARGS: "--gameid mineclonia --worldname world3"
       ## Does not work:
-      ## --pgsql_connection 'host=minetest-postgres port=5432 user=postgres password=postgres dbname=postgres' 
-      ## Needs to be set in the world.mt file as pgsql_connection = host=minetest-postgres ...
+      ## --pgsql_connection 'host=postgres-for-luanti port=5432 user=postgres password=postgres dbname=postgres' 
+      ## Needs to be set in the world.mt file as pgsql_connection = host=postgres-for-luanti ...
     volumes:
       - ./minetest-data:/config/.minetest
     ports:
@@ -43,7 +43,7 @@ services:
 
 
   postgres:
-    container_name: minetest-postgres
+    container_name: postgres-for-luanti
     #image: postgres:17
     image: mypostgres:latest
     build:
@@ -59,7 +59,7 @@ services:
       #POSTGRES_PASSWORD_FILE: /postgres-passwd.txt
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
-      - ./postgres-listenall.conf:/etc/postgresql/postgresql.conf
+      - ./postgresql-stuff/postgres-listenAll.conf:/etc/postgresql/postgresql.conf
       #- ./postgres-passwd.txt:/postgres-passwd.txt
     ports:
       - 5432:5432
@@ -71,9 +71,7 @@ services:
     shm_size: 128mb
     
 
-  #adminer: { image: "adminer", ports: [ 8080:8080 ] }
-
-
+## Not used yet.
 x-shared-minetest:
   environment:
     - PUID=1000
