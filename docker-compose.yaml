@@ -29,7 +29,7 @@ services:
       TZ: Etc/UTC
       #CLI_ARGS: "--gameid devtest"   ## This worked, created a world.
       #CLI_ARGS: "--gameid mineclonia --migrate postgres"
-      CLI_ARGS: "--gameid mineclonia"
+      CLI_ARGS: "--gameid mineclonia --worldname world3"
       ## Does not work:
       ## --pgsql_connection 'host=minetest-postgres port=5432 user=postgres password=postgres dbname=postgres' 
       ## Needs to be set in the world.mt file as pgsql_connection = host=minetest-postgres ...

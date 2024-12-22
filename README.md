@@ -38,6 +38,7 @@ fi
 sudo rm -rf postgres-data/
 mkdir postgres-data/
 sudo chown $USER:999 postgres-data/
+sudo chmod g+rwx postgres-data/
 
 docker compose up
 ```
