@@ -8,3 +8,6 @@ FROM lscr.io/linuxserver/minetest:latest
 
 #RUN echo 'pgsql_connection=user=postgres dbname=postgres' >> /config/.minetest/worlds/world/world.mt
 
+RUN wget -O mineclonia.zip https://content.luanti.org/packages/ryvnf/mineclonia/releases/28965/download/
+RUN unzip mineclonia.zip -d /downloaded/mineclonia
+

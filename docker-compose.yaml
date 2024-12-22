@@ -4,14 +4,14 @@ services:
   mynetest:
     profiles: ["minetest-adjusted"]
     build:
-      dockerfile: foo.dockerfile
+      dockerfile: myMinetest.dockerfile
     image: mynetest
     container_name: mynetest
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Etc/UTC
-      - "CLI_ARGS=--gameid devtest" #optional
+      - "CLI_ARGS=--gameid mineclonia" #optional
     volumes:
       - ./minetest-data:/config/.minetest
     ports:
@@ -27,14 +27,19 @@ services:
       PUID: 1000
       PGID: 1000
       TZ: Etc/UTC
-      CLI_ARGS: "--gameid devtest"
+      #CLI_ARGS: "--gameid devtest"   ## This worked, created a world.
+      #CLI_ARGS: "--gameid mineclonia --migrate postgres"
+      CLI_ARGS: "--gameid mineclonia"
+      ## Does not work:
+      ## --pgsql_connection 'host=minetest-postgres port=5432 user=postgres password=postgres dbname=postgres' 
+      ## Needs to be set in the world.mt file as pgsql_connection = host=minetest-postgres ...
     volumes:
       - ./minetest-data:/config/.minetest
     ports:
       - 30000:30000/udp
     restart: no
     depends_on:
-      - postgres:
+      - postgres
 
 
   postgres:
