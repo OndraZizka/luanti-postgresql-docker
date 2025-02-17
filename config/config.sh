@@ -1,0 +1,3 @@
+
+
+DOCKERHUB_USER=ondrejzizka

@@ -4,7 +4,7 @@ services:
   mynetest:
     profiles: ["minetest-adjusted"]
     build:
-      dockerfile: luanti-boot-image/myMinetest.dockerfile
+      dockerfile: luanti-boot-image/Dockerfile
     image: mynetest
     container_name: mynetest
     environment:
