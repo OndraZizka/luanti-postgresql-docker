@@ -18,6 +18,23 @@ docker container kill luanti-mineclonia-demo
 
 
 
+## Setting up the server info
+
+```
+CONFIG_FILE=./minetest-data/main-config/minetest.conf
+
+sed -i '/^server_announce/d' "$CONFIG_FILE"
+sed -i '/^server_name/d' "$CONFIG_FILE"
+sed -i '/^server_description/d' "$CONFIG_FILE"
+sed -i '/^default_game/d' "$CONFIG_FILE"
+
+echo "server_announce = true" >> "$CONFIG_FILE"
+echo "server_name = My Mineclonia Server" >> "$CONFIG_FILE"
+echo "server_description = A Luanti / Mineclonia server" >> "$CONFIG_FILE"
+echo "default_game = mineclonia" >> "$CONFIG_FILE"
+```
+
+
 ### To create a world of Mineclonia game by launching it:
 
 ```shell
