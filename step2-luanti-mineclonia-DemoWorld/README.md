@@ -1,17 +1,20 @@
 # Mineclonia in Docker - demo
 
-Run it:
+## Usage
+https://github.com/luanti-org/luanti/blob/master/minetest.conf.example
+
+To run it:
 ```shell
 docker run -it --rm -p 30000:30000/udp -e "CLI_ARGS=--gameid mineclonia" --name luanti-mineclonia-demo ondrejzizka/luanti-mineclonia-demo
 ```
 
-See it:
+To see it:
 ```shell
 docker exec -it luanti-mineclonia-demo sh
 # ls -la config/.minetest/games/
 ```
 
-##  Kill it:
+###  To terminate it:
 ```shell
 docker container kill luanti-mineclonia-demo
 ```
@@ -20,7 +23,13 @@ docker container kill luanti-mineclonia-demo
 
 ## Setting up the server info
 
-```
+Here is a [Luanti config template](https://github.com/luanti-org/luanti/blob/master/minetest.conf.example).
+
+Here is the official docs page for hosting a Luanti server: https://docs.luanti.org/for-server-hosts/
+
+A script to replace some values:  (First, delete if they exist, then add.) 
+
+```bash
 CONFIG_FILE=./minetest-data/main-config/minetest.conf
 
 sed -i '/^server_announce/d' "$CONFIG_FILE"
