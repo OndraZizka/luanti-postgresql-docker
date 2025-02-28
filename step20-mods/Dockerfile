@@ -78,13 +78,8 @@ RUN ./downloadAndInstallMod.sh ShadowNinja/areas/releases/27748
 RUN ./downloadAndInstallMod.sh wilkgr76/admin_toys/releases/363
 
 
-## Edit world.mt in the world's folder to contain load_file_MODNAME = true
-
-ENV LUANTI_BASE_DIR=/config/.minetest
-ENV WORLD_DIR=$LUANTI_BASE_DIR/worlds/DemoWorld
-
-## RUN mkdir -p "$WORLD_DIR"
-## COPY template_world.mt "$WORLD_DIR/world.mt"
+## To enable the mods, the `worlds/<name>/world.mt` needs to contain `load_file_<MODNAME> = true` for each.
+## This prepares such list.
 RUN find /config/.minetest/mods/ -type d -maxdepth 1 | sed 's#/#load_file_#g' | sed 's#$# = true#' > enableAllMods-putTo-world.mt
 
 

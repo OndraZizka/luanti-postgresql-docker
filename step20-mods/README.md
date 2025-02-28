@@ -4,7 +4,7 @@
 
 ```shell
 docker build -f ./Dockerfile -t ondrejzizka/luanti-mineclonia-mods:latest .
-docker login -u ondrejzizka   ## Needs a password from a personal token from Dockerhub.
+#docker login -u ondrejzizka   ## Needs a password from a personal token from Dockerhub.
 docker push ondrejzizka/luanti-mineclonia-mods:latest
 ````
 
