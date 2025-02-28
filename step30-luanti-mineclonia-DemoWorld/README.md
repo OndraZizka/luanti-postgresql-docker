@@ -8,7 +8,7 @@ To run it:
 docker run -it --rm -p 30000:30000/udp -e "CLI_ARGS=--gameid mineclonia" --name luanti-mineclonia-demo ondrejzizka/luanti-mineclonia-demo
 ```
 
-To see it:
+To see the container:
 ```shell
 docker exec -it luanti-mineclonia-demo sh
 # ls -la config/.minetest/games/
@@ -23,9 +23,8 @@ docker container kill luanti-mineclonia-demo
 
 ## Setting up the server info
 
-Here is a [Luanti config template](https://github.com/luanti-org/luanti/blob/master/minetest.conf.example).
-
-Here is the official docs page for hosting a Luanti server: https://docs.luanti.org/for-server-hosts/
+ * [Luanti config template](https://github.com/luanti-org/luanti/blob/master/minetest.conf.example).
+ * The official docs page for hosting a Luanti server: https://docs.luanti.org/for-server-hosts/ 
 
 A script to replace some values:  (First, delete if they exist, then add.) 
 

@@ -4,17 +4,17 @@
 
 ```shell
 docker build -f ./Dockerfile -t ondrejzizka/luanti-mineclonia-mods:latest .
-#docker login -u ondrejzizka   ## Needs a password from a personal token from Dockerhub.
 docker push ondrejzizka/luanti-mineclonia-mods:latest
 ````
+May also need: `docker login -u ondrejzizka` (needs a password for personal token from Dockerhub)
+
 
 Run it:
 ```shell
-DOCKERHUB_USER=ondrejzizka
-docker run -it --rm -e "CLI_ARGS=--gameid mineclonia" --name luanti-mineclonia-mods $DOCKERHUB_USER/luanti-mineclonia-mods
+docker run -it --rm -e "CLI_ARGS=--gameid mineclonia" --name luanti-mineclonia-mods ondrejzizka/luanti-mineclonia-mods
 ```
 
-See it:
+Shell within the container:
 ```shell
 docker exec -it luanti-mineclonia-mods sh
 # ls -la config/.minetest/games/

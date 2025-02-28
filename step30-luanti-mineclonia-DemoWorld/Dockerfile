@@ -7,8 +7,7 @@ ENV WORLD_DIR=$LUANTI_BASE_DIR/worlds/DemoWorld
 #RUN mkdir -p "$WORLD_DIR"
 COPY template_world.mt "$WORLD_DIR/world.mt"
 
-#COPY --from=ondrejzizka/luanti-mineclonia-mods:latest
-RUN cat enableAllMods-putTo-world.mt >> "$WORLD_DIR/world.mt"
+RUN cat /enableAllMods-putTo-world.mt >> "$WORLD_DIR/world.mt"
 
 
 #RUN mkdir -p "$LUANTI_BASE_DIR/main-config"
