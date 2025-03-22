@@ -10,13 +10,13 @@ To build and push:
 ```shell
 docker build -f ./Dockerfile -t ondrejzizka/luanti-mineclonia-zizka:latest .
 docker push ondrejzizka/luanti-mineclonia-zizka:latest
-````
+```
 
 Tag a dated version:
 ```shell
-today=$(printf '%(%Y-%m-%d)T\n' -1)
-docker tag ondrejzizka/luanti-mineclonia-zizka:latest ondrejzizka/luanti-mineclonia-zizka:v$today
-docker push ondrejzizka/luanti-mineclonia-zizka:v$today
+now=$(printf '%(%Y-%m-%d_%H%M)T\n' -1)
+docker tag ondrejzizka/luanti-mineclonia-zizka:latest ondrejzizka/luanti-mineclonia-zizka:v$now
+docker push ondrejzizka/luanti-mineclonia-zizka:v$now
 ```
 
 Run it:
