@@ -41,6 +41,9 @@ RUN ./downloadAndInstallMod.sh Liil/marinaramobs/releases/16924
 
 
 ## --- Utilities ---
+
+RUN ./downloadAndInstallMod.sh m16b/m16b_new_elytras/releases/32336
+
 ### Leads
 RUN ./downloadAndInstallMod.sh SilverSandstone/leads/releases/23044
 ### Simple Woodcutter [verified]
