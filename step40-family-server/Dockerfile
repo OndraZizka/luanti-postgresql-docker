@@ -1,5 +1,5 @@
 
-FROM ondrejzizka/luanti-mineclonia-demo:latest
+FROM ondrejzizka/luanti-mineclonia-demo:latest AS luanti-mineclonia-zizka
 
 ENV LUANTI_BASE_DIR=/config/.minetest
 ENV WORLD_DIR=$LUANTI_BASE_DIR/worlds/DemoWorld

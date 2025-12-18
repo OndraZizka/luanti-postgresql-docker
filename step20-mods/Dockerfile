@@ -1,6 +1,6 @@
 
 
-FROM ondrejzizka/luanti-mineclonia
+FROM ondrejzizka/luanti-mineclonia AS luanti-mineclonia-mods
 
 ##  ===  Mods - environment - all should be compatible with Mineclonia.  ===
 
