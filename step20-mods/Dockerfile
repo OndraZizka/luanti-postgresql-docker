@@ -15,22 +15,22 @@ RUN ./downloadAndInstallMod.sh TenPlus1/mobs/releases/33765
 RUN ./downloadAndInstallMod.sh TenPlus1/mobs_monster/releases/33474
 RUN ./downloadAndInstallMod.sh TenPlus1/mobs_animal/releases/33409
 ### Newly added 2025-12-18 - not tested.
-RUN ./downloadAndInstallMod.sh TenPlus1/dmobs/releases/33187
-RUN ./downloadAndInstallMod.sh TenPlus1/mobs_water/releases/33575
-RUN ./downloadAndInstallMod.sh TenPlus1/nssb/releases/30952
-RUN ./downloadAndInstallMod.sh TenPlus1/nssm/releases/33886
-RUN ./downloadAndInstallMod.sh TenPlus1/nssm_extra/releases/33887
+#RUN ./downloadAndInstallMod.sh TenPlus1/dmobs/releases/33187
+#RUN ./downloadAndInstallMod.sh TenPlus1/mobs_water/releases/33575
+#RUN ./downloadAndInstallMod.sh TenPlus1/nssb/releases/30952
+#RUN ./downloadAndInstallMod.sh TenPlus1/nssm/releases/33886
+#RUN ./downloadAndInstallMod.sh TenPlus1/nssm_extra/releases/33887
 
 
 ###  Depends: Wilhelmines Animal World
 RUN ./downloadAndInstallMod.sh Liil/animalworld/releases/24027
 ### Newly added 2025-12-18 - not tested.
-RUN ./downloadAndInstallMod.sh Liil/livingcavesmobs/releases/26889
-RUN ./downloadAndInstallMod.sh Liil/livingdesert/releases/19250
-RUN ./downloadAndInstallMod.sh Liil/livingfloatlands/releases/19252
-RUN ./downloadAndInstallMod.sh Liil/livingjungle/releases/17267
+#RUN ./downloadAndInstallMod.sh Liil/livingcavesmobs/releases/26889
+#RUN ./downloadAndInstallMod.sh Liil/livingdesert/releases/19250
+#RUN ./downloadAndInstallMod.sh Liil/livingfloatlands/releases/19252
+#RUN ./downloadAndInstallMod.sh Liil/livingjungle/releases/17267
 RUN ./downloadAndInstallMod.sh Liil/livingnether/releases/26157
-RUN ./downloadAndInstallMod.sh Liil/marinaramobs/releases/16924
+#RUN ./downloadAndInstallMod.sh Liil/marinaramobs/releases/16924
 
 ## Too old? 2021
 #RUN ./downloadAndInstallMod.sh DrPlamsa/flower_cow/releases/5998
@@ -42,7 +42,7 @@ RUN ./downloadAndInstallMod.sh Liil/marinaramobs/releases/16924
 
 ## --- Utilities ---
 
-RUN ./downloadAndInstallMod.sh m16b/m16b_new_elytras/releases/32336
+#RUN ./downloadAndInstallMod.sh m16b/m16b_new_elytras/releases/32336
 
 ### Leads
 RUN ./downloadAndInstallMod.sh SilverSandstone/leads/releases/23044
@@ -60,7 +60,7 @@ RUN ./downloadAndInstallMod.sh mt-mods/xcompat/releases/27623
 RUN ./downloadAndInstallMod.sh mt-mods/moretrees/releases/28466
 
 ## Other Worlds - asteroids - 2025-06-04
-RUN ./downloadAndInstallMod.sh TenPlus1/other_worlds/releases/31465
+#RUN ./downloadAndInstallMod.sh TenPlus1/other_worlds/releases/31465
 
 
 ## Library for Schematics
@@ -80,21 +80,21 @@ RUN ./downloadAndInstallMod.sh ElCeejo/animalia/releases/23715
 RUN ./downloadAndInstallMod.sh dougsouza26/stonelike_blocks/releases/27910
 
 ## Baked Clay
-RUN ./downloadAndInstallMod.sh TenPlus1/bakedclay/releases/31934
+#RUN ./downloadAndInstallMod.sh TenPlus1/bakedclay/releases/31934
 
 ## More Ores
 RUN ./downloadAndInstallMod.sh Calinou/moreores/releases/30151
 
-## Better End RUN ./downloadAndInstallMod.sh TX_Miner/mcl_better_end/
+## Better End
 RUN ./downloadAndInstallMod.sh TX_Miner/mcl_better_end/releases/29849
 
 
 ## --- Silly stuff ---
 
 ###    AirUtils
-RUN ./downloadAndInstallMod.sh apercy/airutils/releases/33562
+#RUN ./downloadAndInstallMod.sh apercy/airutils/releases/33562
 ###    Depends: Steampunk Blimp
-RUN ./downloadAndInstallMod.sh apercy/steampunk_blimp/releases/33749
+#RUN ./downloadAndInstallMod.sh apercy/steampunk_blimp/releases/33749
 
 
 
