@@ -30,7 +30,7 @@ docker exec -it luanti-mineclonia-mods sh
 # ls -la config/.minetest/games/
 ```
 
-##  Kill it:
+Kill it:
 ```shell
 docker container kill luanti-mineclonia-zizka
 ```
