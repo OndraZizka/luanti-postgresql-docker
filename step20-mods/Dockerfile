@@ -15,34 +15,34 @@ RUN ./downloadAndInstallMod.sh TenPlus1/mobs/releases/35616
 RUN ./downloadAndInstallMod.sh TenPlus1/mobs_monster/releases/35216
 RUN ./downloadAndInstallMod.sh TenPlus1/mobs_animal/releases/34877
 ### Newly added 2025-12-18 - not tested.
-#RUN ./downloadAndInstallMod.sh TenPlus1/dmobs/releases/33187
-#RUN ./downloadAndInstallMod.sh TenPlus1/mobs_water/releases/33575
-#RUN ./downloadAndInstallMod.sh TenPlus1/nssb/releases/30952
-#RUN ./downloadAndInstallMod.sh TenPlus1/nssm/releases/33886
-#RUN ./downloadAndInstallMod.sh TenPlus1/nssm_extra/releases/33887
+#RUN ./downloadAndInstallMod.sh TenPlus1/dmobs/releases/33379
+#RUN ./downloadAndInstallMod.sh TenPlus1/mobs_water/releases/33827
+#RUN ./downloadAndInstallMod.sh TenPlus1/nssb/releases/31141
+#RUN ./downloadAndInstallMod.sh TenPlus1/nssm/releases/34101
+#RUN ./downloadAndInstallMod.sh TenPlus1/nssm_extra/releases/34102
 
 
 ###  Depends: Wilhelmines Animal World
 RUN ./downloadAndInstallMod.sh Liil/animalworld/releases/24027
 ### Newly added 2025-12-18 - not tested.
-#RUN ./downloadAndInstallMod.sh Liil/livingcavesmobs/releases/26889
-#RUN ./downloadAndInstallMod.sh Liil/livingdesert/releases/19250
-#RUN ./downloadAndInstallMod.sh Liil/livingfloatlands/releases/19252
-#RUN ./downloadAndInstallMod.sh Liil/livingjungle/releases/17267
+#RUN ./downloadAndInstallMod.sh Liil/livingcavesmobs/releases/27187
+#RUN ./downloadAndInstallMod.sh Liil/livingdesert/releases/19548
+#RUN ./downloadAndInstallMod.sh Liil/livingfloatlands/releases/19550
+#RUN ./downloadAndInstallMod.sh Liil/livingjungle/releases/17565
 RUN ./downloadAndInstallMod.sh Liil/livingnether/releases/26157
-#RUN ./downloadAndInstallMod.sh Liil/marinaramobs/releases/16924
+#RUN ./downloadAndInstallMod.sh Liil/marinaramobs/releases/17222
 
 ## Too old? 2021
-#RUN ./downloadAndInstallMod.sh DrPlamsa/flower_cow/releases/5998
-#RUN ./downloadAndInstallMod.sh DrPlamsa/guinea_pig/releases/5997
+#RUN ./downloadAndInstallMod.sh DrPlamsa/flower_cow/releases/6179
+#RUN ./downloadAndInstallMod.sh DrPlamsa/guinea_pig/releases/6178
 ## 2025
-#RUN ./downloadAndInstallMod.sh TenPlus1/mobs_slimes/releases/30949
-#RUN ./downloadAndInstallMod.sh FreeLikeGNU/goblins/releases/32959
+#RUN ./downloadAndInstallMod.sh TenPlus1/mobs_slimes/releases/31399
+#RUN ./downloadAndInstallMod.sh FreeLikeGNU/goblins/releases/33305
 
 
 ## --- Utilities ---
 
-#RUN ./downloadAndInstallMod.sh m16b/m16b_new_elytras/releases/32336
+#RUN ./downloadAndInstallMod.sh m16b/m16b_new_elytras/releases/32816
 
 ### Leads
 RUN ./downloadAndInstallMod.sh SilverSandstone/leads/releases/31637
@@ -60,7 +60,7 @@ RUN ./downloadAndInstallMod.sh mt-mods/xcompat/releases/35043
 RUN ./downloadAndInstallMod.sh mt-mods/moretrees/releases/34573
 
 ## Other Worlds - asteroids - 2025-06-04
-#RUN ./downloadAndInstallMod.sh TenPlus1/other_worlds/releases/31465
+#RUN ./downloadAndInstallMod.sh TenPlus1/other_worlds/releases/31790
 
 
 ## Library for Schematics
@@ -74,13 +74,13 @@ RUN ./downloadAndInstallMod.sh mt-mods/mcl_extra_structures/releases/34611
 ## Animalia [WORKS]
 RUN ./downloadAndInstallMod.sh ElCeejo/animalia/releases/34128
 ## Everness [FAILS]
-#RUN ./downloadAndInstallMod.sh SaKeL/everness/releases/24216
+#RUN ./downloadAndInstallMod.sh SaKeL/everness/releases/24697
 
 ##  Stone-like Blocks for Mineclonia
 RUN ./downloadAndInstallMod.sh dougsouza26/stonelike_blocks/releases/27910
 
 ## Baked Clay
-#RUN ./downloadAndInstallMod.sh TenPlus1/bakedclay/releases/31934
+#RUN ./downloadAndInstallMod.sh TenPlus1/bakedclay/releases/32249
 
 ## More Ores
 RUN ./downloadAndInstallMod.sh Calinou/moreores/releases/45388320
@@ -92,9 +92,9 @@ RUN ./downloadAndInstallMod.sh TX_Miner/mcl_better_end/releases/29849
 ## --- Silly stuff ---
 
 ###    AirUtils
-#RUN ./downloadAndInstallMod.sh apercy/airutils/releases/33562
+#RUN ./downloadAndInstallMod.sh apercy/airutils/releases/33835
 ###    Depends: Steampunk Blimp
-#RUN ./downloadAndInstallMod.sh apercy/steampunk_blimp/releases/33749
+#RUN ./downloadAndInstallMod.sh apercy/steampunk_blimp/releases/33898
 
 
 
@@ -104,7 +104,7 @@ RUN ./downloadAndInstallMod.sh AntumDeluge/whitelist/releases/35420
 ### Areas - protection of areas
 RUN ./downloadAndInstallMod.sh ShadowNinja/areas/releases/34950
 ### Simple Protection - area chunk protection, see RUN ./downloadAndInstallMod.sh Krock/simple_protection/
-#RUN ./downloadAndInstallMod.sh Krock/simple_protection/releases/14476
+#RUN ./downloadAndInstallMod.sh Krock/simple_protection/releases/14723
 ### Funny tweaks of players' physics.
 RUN ./downloadAndInstallMod.sh wilkgr76/admin_toys/releases/363
 
