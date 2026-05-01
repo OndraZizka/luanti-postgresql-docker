@@ -1,8 +1,9 @@
 
-FROM lscr.io/linuxserver/luanti:5.15.1 AS luanti-mineclonia
+FROM lscr.io/linuxserver/luanti:5.16.0 AS luanti-mineclonia
 
-# 0.118.1
-ARG minecloniaUrl=https://content.luanti.org/packages/ryvnf/mineclonia/releases/35133/download/
+# 0.121.1
+ARG minecloniaUrl=https://content.luanti.org/packages/ryvnf/mineclonia/releases/35899/download/
+
 RUN wget -O mineclonia.zip $minecloniaUrl && \
     mkdir -p /config/.minetest/ && \
     unzip mineclonia.zip -d /config/.minetest/games/ && \
