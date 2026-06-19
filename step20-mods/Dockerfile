@@ -11,7 +11,7 @@ COPY ./downloadAndInstallMod.sh ./
 ## --- Mobs ---
 
 ## Mobs Redo API 2025-12-05
-## 2025-06-19: Are all thse redundant and in fact harmful?
+## 2025-06-19: Are all these redundant and in fact harmful?
 ## "Mineclonia features native, custom physics, pathfinding algorithms, and behaviors for its animals and monsters."
 ## All supposedly for the Minetest game; Mineclonia has its own. Safe to REMOVE.
 #RUN ./downloadAndInstallMod.sh TenPlus1/mobs/releases/36381
@@ -20,7 +20,7 @@ COPY ./downloadAndInstallMod.sh ./
 #RUN ./downloadAndInstallMod.sh TenPlus1/mobs_animal/releases/36266
 ### Newly added 2025-12-18.
 #RUN ./downloadAndInstallMod.sh TenPlus1/dmobs/releases/36326
-#RUN ./downloadAndInstallMod.sh TenPlus1/mobs_water/releases/33575
+#RUN ./downloadAndInstallMod.sh TenPlus1/mobs_water/releases/33827
 #RUN ./downloadAndInstallMod.sh TenPlus1/nssb/releases/35638
 #RUN ./downloadAndInstallMod.sh TenPlus1/nssm/releases/36054
 #RUN ./downloadAndInstallMod.sh TenPlus1/nssm_extra/releases/36055
@@ -29,24 +29,24 @@ COPY ./downloadAndInstallMod.sh ./
 ###  Depends: Wilhelmines Animal World
 #RUN ./downloadAndInstallMod.sh Liil/animalworld/releases/24027
 ### Newly added 2025-12-18.
-#RUN ./downloadAndInstallMod.sh Liil/livingcavesmobs/releases/26889
-#RUN ./downloadAndInstallMod.sh Liil/livingdesert/releases/19250
-#RUN ./downloadAndInstallMod.sh Liil/livingfloatlands/releases/19252
-#RUN ./downloadAndInstallMod.sh Liil/livingjungle/releases/17267
+#RUN ./downloadAndInstallMod.sh Liil/livingcavesmobs/releases/27187
+#RUN ./downloadAndInstallMod.sh Liil/livingdesert/releases/19548
+#RUN ./downloadAndInstallMod.sh Liil/livingfloatlands/releases/19550
+#RUN ./downloadAndInstallMod.sh Liil/livingjungle/releases/17565
 #RUN ./downloadAndInstallMod.sh Liil/livingnether/releases/26157
-#RUN ./downloadAndInstallMod.sh Liil/marinaramobs/releases/16924
+#RUN ./downloadAndInstallMod.sh Liil/marinaramobs/releases/17222
 
 ## Too old? 2021
 #RUN ./downloadAndInstallMod.sh DrPlamsa/flower_cow/releases/6179
 #RUN ./downloadAndInstallMod.sh DrPlamsa/guinea_pig/releases/6178
 ## 2025
 #RUN ./downloadAndInstallMod.sh TenPlus1/mobs_slimes/releases/36267
-#RUN ./downloadAndInstallMod.sh FreeLikeGNU/goblins/releases/32959
+#RUN ./downloadAndInstallMod.sh FreeLikeGNU/goblins/releases/33305
 
 
 ## --- Utilities ---
 
-#RUN ./downloadAndInstallMod.sh m16b/m16b_new_elytras/releases/32336
+#RUN ./downloadAndInstallMod.sh m16b/m16b_new_elytras/releases/32816
 
 ### Leads [Already included in Mineclonia.]
 #RUN ./downloadAndInstallMod.sh SilverSandstone/leads/releases/31637
@@ -70,7 +70,7 @@ RUN ./downloadAndInstallMod.sh mt-mods/xcompat/releases/35043
 #RUN ./downloadAndInstallMod.sh Sokomine/mg_villages/releases/20488
 
 ## Extra Structures  [for Mineclonia]
-RUN ./downloadAndInstallMod.sh mt-mods/mcl_extra_structures/releases/34000
+RUN ./downloadAndInstallMod.sh mt-mods/mcl_extra_structures/releases/34611
 
 ## Animalia [WORKS with Mineclonia]
 RUN ./downloadAndInstallMod.sh ElCeejo/animalia/releases/34128
@@ -148,7 +148,7 @@ RUN ./downloadAndInstallMod.sh TenPlus1/protector/releases/35096
 ### Areas - protection of areas
 RUN ./downloadAndInstallMod.sh ShadowNinja/areas/releases/34950
 ### Simple Protection - area chunk protection, see RUN ./downloadAndInstallMod.sh Krock/simple_protection/
-#RUN ./downloadAndInstallMod.sh Krock/simple_protection/releases/14476
+#RUN ./downloadAndInstallMod.sh Krock/simple_protection/releases/14723
 ### Funny tweaks of players' physics.
 RUN ./downloadAndInstallMod.sh wilkgr76/admin_toys/releases/363
 
