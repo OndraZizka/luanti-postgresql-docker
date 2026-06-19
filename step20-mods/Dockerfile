@@ -120,8 +120,19 @@ RUN ./downloadAndInstallMod.sh cathisnothome/flesc_to_leather/releases/36886
 RUN ./downloadAndInstallMod.sh dougsouza26/mosaic_planks/releases/27915
 ## Decorative pedestal for items.
 RUN ./downloadAndInstallMod.sh michi16bit/item_displayed/releases/32845
-## Glass panes can be placed in various ways.
-## Open chests behind paintings and frames with a right click.
+
+RUN ./downloadAndInstallMod.sh bgstack15/obsidian_extra/releases/31577
+RUN ./downloadAndInstallMod.sh bgstack15/mcl_ruby_stuff/releases/35536
+RUN ./downloadAndInstallMod.sh bgstack15/mcl_lapis_stuff/releases/35551
+RUN ./downloadAndInstallMod.sh MatthiasZM96/mcl_backpack/releases/23507
+RUN ./downloadAndInstallMod.sh m16b/m16b_new_mobs/releases/36006
+## A boat for lava.
+RUN ./downloadAndInstallMod.sh bgstack15/molten_sailor_mcl/releases/35447
+## Some more music discs.
+RUN ./downloadAndInstallMod.sh cora/mcla_goldberg/releases/24717
+RUN ./downloadAndInstallMod.sh Thisaccountis42/mcl_jukebox_c418/releases/16485
+RUN ./downloadAndInstallMod.sh TomCon/discovery_maps/releases/34183
+## TODO: Set mcl_signs_editable = 1 or such.
 
 
 ##  === Mods - server administration ===
