@@ -45,9 +45,9 @@ COPY ./downloadAndInstallMod.sh ./
 
 #RUN ./downloadAndInstallMod.sh m16b/m16b_new_elytras/releases/32336
 
-### Leads
+### Leads [Already included in Mineclonia.]
 #RUN ./downloadAndInstallMod.sh SilverSandstone/leads/releases/31637
-### Simple Woodcutter [verified]
+### Simple Woodcutter [incompatible with Mineclonia]
 #RUN ./downloadAndInstallMod.sh luarocks/simple_woodcutter/releases/20594
 
 
@@ -94,7 +94,6 @@ RUN ./downloadAndInstallMod.sh TX_Miner/mcl_better_end/releases/29849
 ###    Depends: Steampunk Blimp
 #RUN ./downloadAndInstallMod.sh apercy/steampunk_blimp/releases/36216
 
-
 ## -- Added 2026-06 --
 ## Ambience (Immersive Sounds for Mineclonia)
 RUN ./downloadAndInstallMod.sh TenPlus1/ambience/releases/36854
@@ -102,6 +101,8 @@ RUN ./downloadAndInstallMod.sh TenPlus1/ambience/releases/36854
 RUN ./downloadAndInstallMod.sh rudzik8/mcl_decor/releases/36283
 ## Mineclonia Wieldlight (Dynamic lighting, off-hand compatible.) May cause server perf issues.
 #RUN ./downloadAndInstallMod.sh cora/mcl_wieldlight/releases/25501
+## Better - client-only.
+RUN ./downloadAndInstallMod.sh mt-mods/illumination/releases/33621
 RUN ./downloadAndInstallMod.sh erle/mcl_quick_harvest/releases/27443
 RUN ./downloadAndInstallMod.sh Codiac/mcl_3d_plants/releases/25501
 RUN ./downloadAndInstallMod.sh Neton/enchantments_extractor/releases/29841
@@ -113,25 +114,14 @@ RUN ./downloadAndInstallMod.sh Camelia/farm_tools/releases/35555
 RUN ./downloadAndInstallMod.sh Codiac/codihacks/releases/35790
 RUN ./downloadAndInstallMod.sh dougsouza26/hollow_logs/releases/27914
 ## Creepers run away from wild foxes.
-RUN ./downloadAndInstallMod.sh erle/mcl_foxy_creepers/releases/27444
 ## Smelt rotten flesh to leather.
 RUN ./downloadAndInstallMod.sh cathisnothome/flesc_to_leather/releases/36886
 ## Decorative wooden blocks.
 RUN ./downloadAndInstallMod.sh dougsouza26/mosaic_planks/releases/27915
 ## Decorative pedestal for items.
 RUN ./downloadAndInstallMod.sh michi16bit/item_displayed/releases/32845
-RUN ./downloadAndInstallMod.sh Extex/mcl_footsteps/releases/35849
-RUN ./downloadAndInstallMod.sh Zandram/mcl_fancy_beds/releases/36856
 ## Glass panes can be placed in various ways.
-RUN ./downloadAndInstallMod.sh rudzik8/mcl_panes/releases/36284
 ## Open chests behind paintings and frames with a right click.
-RUN ./downloadAndInstallMod.sh cora/mcl_item_frames_io/releases/25502
-RUN ./downloadAndInstallMod.sh Zandram/mcl_glow_berries/releases/36855
-RUN ./downloadAndInstallMod.sh erle/mcl_banner_shields/releases/27445
-RUN ./downloadAndInstallMod.sh rudzik8/mcl_more_banners/releases/36285
-RUN ./downloadAndInstallMod.sh Extex/mcl_rain_particles/releases/35851
-RUN ./downloadAndInstallMod.sh cora/mcl_armor_hud/releases/25503
-RUN ./downloadAndInstallMod.sh Gregon/mcl_smooth_particles/releases/27449
 
 
 ##  === Mods - server administration ===
