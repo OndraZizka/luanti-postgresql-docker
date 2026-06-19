@@ -7,8 +7,8 @@ URL="https://content.luanti.org/packages/$MOD_AUTHOR_AND_NAME_AND_RELEASE/downlo
 mkdir ./mod
 
 echo " * Downloading: $URL"
-wget -O mod.zip "$URL"
-unzip mod.zip -d ./mod/
+curl -fL -o mod.zip "$URL" || { echo "ERROR: Failed to download from $URL (HTTP error or file not found - check 404)"; exit 1; }
+unzip mod.zip -d ./mod/ || { echo "ERROR: Failed to unzip mod.zip"; exit 1; }
 rm mod.zip
 
 FOO=$( ls -ld * | wc -l)

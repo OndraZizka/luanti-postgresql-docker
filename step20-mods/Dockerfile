@@ -1,5 +1,8 @@
 FROM ondrejzizka/luanti-mineclonia AS luanti-mineclonia-mods
 
+## Ensure the build fails if any RUN command fails
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 ##  ===  Mods - environment - all should be compatible with Mineclonia.  ===
 
 COPY ./downloadAndInstallMod.sh ./
