@@ -70,15 +70,15 @@ RUN ./downloadAndInstallMod.sh mt-mods/xcompat/releases/35043
 #RUN ./downloadAndInstallMod.sh Sokomine/mg_villages/releases/20488
 
 ## Extra Structures  [for Mineclonia]
-RUN ./downloadAndInstallMod.sh mt-mods/mcl_extra_structures/releases/34611
+RUN ./downloadAndInstallMod.sh mt-mods/mcl_extra_structures/releases/34000
 
 ## Animalia [WORKS with Mineclonia]
 RUN ./downloadAndInstallMod.sh ElCeejo/animalia/releases/34128
 ## Everness  [for Minetest -> Incompatible + Redundant, FAILS]
 #RUN ./downloadAndInstallMod.sh SaKeL/everness/releases/30981
 
-##  Stone-like Blocks [for Mineclonia]
-RUN ./downloadAndInstallMod.sh dougsouza26/stonelike_blocks/releases/27910
+##  Stone-like Blocks [for Mineclonia]  ## Does not exist anymore?
+#RUN ./downloadAndInstallMod.sh dougsouza26/stonelike_blocks/releases/27910
 
 ## Baked Clay  [for Minetest -> Incompatible + Redundant]
 #RUN ./downloadAndInstallMod.sh TenPlus1/bakedclay/releases/36240
@@ -99,35 +99,39 @@ RUN ./downloadAndInstallMod.sh TX_Miner/mcl_better_end/releases/29849
 
 ## -- Added 2026-06 --
 ## Ambience (Immersive Sounds for Mineclonia)
-RUN ./downloadAndInstallMod.sh TenPlus1/ambience/releases/36854
+RUN ./downloadAndInstallMod.sh TenPlus1/ambience/releases/38020
 ## Mineclonia Furniture & Decorations
-RUN ./downloadAndInstallMod.sh rudzik8/mcl_decor/releases/36283
+RUN ./downloadAndInstallMod.sh rudzik8/mcl_decor/releases/35460
 ## Mineclonia Wieldlight (Dynamic lighting, off-hand compatible.) May cause server perf issues.
 #RUN ./downloadAndInstallMod.sh cora/mcl_wieldlight/releases/25501
 ## Better - client-only.
-RUN ./downloadAndInstallMod.sh mt-mods/illumination/releases/33621
-RUN ./downloadAndInstallMod.sh erle/mcl_quick_harvest/releases/27443
-RUN ./downloadAndInstallMod.sh Codiac/mcl_3d_plants/releases/25501
-RUN ./downloadAndInstallMod.sh Neton/enchantments_extractor/releases/29841
+RUN ./downloadAndInstallMod.sh mt-mods/illumination/releases/36882
+RUN ./downloadAndInstallMod.sh erlehmann/mcl_quick_harvest_replant/releases/20784
+#RUN ./downloadAndInstallMod.sh Codiac/mcl_3d_plants/releases/25501  ## Does not exists? Instead:
+RUN ./downloadAndInstallMod.sh Codiac/mcl_small_3d_plants/releases/35229
+RUN ./downloadAndInstallMod.sh Impulse/enchantments_extractor/releases/22596
 
 ## /custom_spawn set: Sets the players (the one who ran the command) spawn to their current position.
 ## /custom_spawn clear: Clears the players custom spawn, making them use beds / world spawn again.
 RUN ./downloadAndInstallMod.sh aliaslion/custom_spawn/releases/36811
-RUN ./downloadAndInstallMod.sh Camelia/farm_tools/releases/35555
-RUN ./downloadAndInstallMod.sh Codiac/codihacks/releases/35790
-RUN ./downloadAndInstallMod.sh dougsouza26/hollow_logs/releases/27914
+RUN ./downloadAndInstallMod.sh camelia/farmtools/releases/32877
+RUN ./downloadAndInstallMod.sh Codiac/mcla_codihacks/releases/34713  ## !!! Many changes, could cause troubles !!!
+RUN ./downloadAndInstallMod.sh dougsouza26/jds_hollow_logs/releases/35648
 ## Creepers run away from wild foxes.
 ## Smelt rotten flesh to leather.
-RUN ./downloadAndInstallMod.sh cathisnothome/flesc_to_leather/releases/36886
+RUN ./downloadAndInstallMod.sh cathisnothome/ofcath_flesctoleather/releases/36653
 ## Decorative wooden blocks.
-RUN ./downloadAndInstallMod.sh dougsouza26/mosaic_planks/releases/27915
+RUN ./downloadAndInstallMod.sh dougsouza26/mcl_mosaic_planks/releases/29126
 ## Decorative pedestal for items.
-RUN ./downloadAndInstallMod.sh michi16bit/item_displayed/releases/32845
+RUN ./downloadAndInstallMod.sh m16b/m16b_item_displayed/releases/32425
+## 3 more decorations of elytra.
+RUN ./downloadAndInstallMod.sh m16b/m16b_new_elytras/releases/32336
 
 RUN ./downloadAndInstallMod.sh bgstack15/obsidian_extra/releases/31577
 RUN ./downloadAndInstallMod.sh bgstack15/mcl_ruby_stuff/releases/35536
 RUN ./downloadAndInstallMod.sh bgstack15/mcl_lapis_stuff/releases/35551
 RUN ./downloadAndInstallMod.sh MatthiasZM96/mcl_backpack/releases/23507
+## A couple of things, especially, pale oak (white wood).
 RUN ./downloadAndInstallMod.sh m16b/m16b_new_mobs/releases/36006
 ## A boat for lava.
 RUN ./downloadAndInstallMod.sh bgstack15/molten_sailor_mcl/releases/35447
@@ -140,20 +144,23 @@ RUN ./downloadAndInstallMod.sh nandology/copper_golem/releases/37254
 RUN ./downloadAndInstallMod.sh xyzshantaram/vl_copper_rails_recipes/releases/35438
 
 
-
 ##  === Mods - server administration ===
-#RUN ./downloadAndInstallMod.sh AntumDeluge/whitelist/releases/14093 ## Older, redundant
-RUN ./downloadAndInstallMod.sh ughy/whitelist/releases/35420
+#RUN ./downloadAndInstallMod.sh ughy/whitelist/releases/35420 ## Not really useful - we want to be open.
 
 ###  Protector Redo - .
-RUN ./downloadAndInstallMod.sh TenPlus1/protector/releases/35096
+RUN ./downloadAndInstallMod.sh TenPlus1/protector/releases/37670
 
 ### Areas - protection of areas
-RUN ./downloadAndInstallMod.sh ShadowNinja/areas/releases/34950
+RUN ./downloadAndInstallMod.sh ShadowNinja/areas/releases/37877
+
 ### Simple Protection - area chunk protection, see RUN ./downloadAndInstallMod.sh Krock/simple_protection/
 #RUN ./downloadAndInstallMod.sh Krock/simple_protection/releases/14723
 ### Funny tweaks of players' physics.
-RUN ./downloadAndInstallMod.sh wilkgr76/admin_toys/releases/363
+RUN ./downloadAndInstallMod.sh wilkgr76/admin_toys/releases/363 \
+
+### A Luanti mod which aims to improve user experience with Area Protection Mod by adding tools for easier area manipulation.
+RUN ./downloadAndInstallMod.sh rangeTonic/areas_helper_tools/releases/34790
+RUN ./downloadAndInstallMod.sh cheapie/areasprotector/releases/36144
 
 
 ## To enable the mods, the `worlds/<name>/world.mt` needs to contain `load_file_<MODNAME> = true` for each.
