@@ -136,6 +136,9 @@ RUN ./downloadAndInstallMod.sh cora/mcla_goldberg/releases/24717
 RUN ./downloadAndInstallMod.sh Thisaccountis42/mcl_jukebox_c418/releases/16485
 RUN ./downloadAndInstallMod.sh TomCon/discovery_maps/releases/34183
 ## TODO: Set mcl_signs_editable = 1 or such.
+RUN ./downloadAndInstallMod.sh nandology/copper_golem/releases/37254
+RUN ./downloadAndInstallMod.sh xyzshantaram/vl_copper_rails_recipes/releases/35438
+
 
 
 ##  === Mods - server administration ===
