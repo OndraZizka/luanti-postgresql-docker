@@ -6,7 +6,7 @@ player_backend = sqlite3
 
 backend = postgresql
 gameid = mineclonia
-world_name = world3
+world_name = world_postgres
 
 ## This way, Luanti tries to connect to a socket: /run/postgresql/.s.PGSQL.5432
 #pgsql_connection = user=postgres dbname=postgres
