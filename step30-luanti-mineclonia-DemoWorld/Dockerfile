@@ -1,18 +1,14 @@
 
-FROM ondrejzizka/luanti-mineclonia-mods:latest AS luanti-mineclonia-demo
+FROM ondrejzizka/luanti-mineclonia-easy:latest AS luanti-mineclonia-demo
 
 ## Ensure the build fails if any RUN command fails
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-ENV LUANTI_BASE_DIR=/config/.minetest
-ENV WORLD_DIR=$LUANTI_BASE_DIR/worlds/DemoWorld
+#ENV LSIO_LUANTI_BASE_DIR=/config/.minetest
+ENV THIS_WORLD_DIR=$LSIO_LUANTI_BASE_DIR/worlds/DemoWorld
 
-#RUN mkdir -p "$WORLD_DIR"
-COPY template_world.mt "$WORLD_DIR/world.mt"
+RUN mkdir -p "$THIS_WORLD_DIR" && cp /templates/template_world.mt "$THIS_WORLD_DIR/world.mt"
 
-RUN echo "" >> "$WORLD_DIR/world.mt"
-RUN cat /enableAllMods-putTo-world.mt >> "$WORLD_DIR/world.mt"
-
-
-#RUN mkdir -p "$LUANTI_BASE_DIR/main-config"
-COPY template_main-config_minetest.conf $LUANTI_BASE_DIR/main-config/minetest.conf
+## Enable all mods for this world which is being prepared.
+RUN echo "" >> "$THIS_WORLD_DIR/world.mt"
+RUN cat /enableAllMods-putTo-world.mt >> "$THIS_WORLD_DIR/world.mt"

@@ -3,6 +3,11 @@ FROM ondrejzizka/luanti-mineclonia:latest AS luanti-mineclonia-mods
 ## Ensure the build fails if any RUN command fails
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+
+## World config template, will be copied when creating the "world" in further images.
+COPY templates/template_world.mt /templates/
+
+
 ##  ===  Mods - environment - all should be compatible with Mineclonia.  ===
 
 COPY ./downloadAndInstallMod.sh ./
@@ -167,6 +172,9 @@ RUN ./downloadAndInstallMod.sh cheapie/areasprotector/releases/36144
 ## This prepares such list.
 RUN find /config/.minetest/mods/ -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sed 's#.*#load_mod_& = mods/&#' > enableAllMods-putTo-world.mt
 
+FROM luanti-mineclonia-mods AS luanti-mineclonia-easy
+ENV LSIO_LUANTI_BASE_DIR=/config/.minetest
+COPY templates/template_main-config_minetest.conf $LSIO_LUANTI_BASE_DIR/main-config/minetest.conf
 
-FROM luanti-mineclonia-mods AS luanti-mineclonia-mods-debug
+#FROM luanti-mineclonia-easy AS luanti-mineclonia-easy-debug
 #RUN apk add --no-cache mc  ## For debugging - to see what is the final structure.

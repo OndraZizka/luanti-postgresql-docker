@@ -24,7 +24,7 @@ while IFS= read -r LINE; do
     PROPERTY_VALUE=$(echo "$LINE" | sed 's#^.* *= *##')
     echo -e "\tProperty: $PROPERTY_NAME: $PROPERTY_VALUE"
 
-    sed -i '/^$PROPERTY_NAME/d' "$TARGET_CONFIG_FILE"
+    sed -i "/^${PROPERTY_NAME} *=/d" "$TARGET_CONFIG_FILE"
     echo "$PROPERTY_NAME = $PROPERTY_VALUE" >> "$TARGET_CONFIG_FILE"
 
 done < $NEW_PROPERTIES_FILE
