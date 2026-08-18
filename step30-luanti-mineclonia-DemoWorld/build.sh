@@ -2,8 +2,11 @@
 
 source ../config/config.sh
 
-IMAGE_ID=$DOCKERHUB_USER/luanti-mineclonia-demo:latest
+RESULTING_IMAGE=$DOCKERHUB_USER/luanti-mineclonia-demo:latest
 
-docker build -f ./Dockerfile -t $IMAGE_ID .
+docker build -f ./Dockerfile -t $RESULTING_IMAGE .
 #docker login --username ondrejzizka   ## Needs a password from a personal token from Dockerhub.
-docker push $IMAGE_ID
+
+echo
+echo "Pushing: $RESULTING_IMAGE"
+docker push $RESULTING_IMAGE
