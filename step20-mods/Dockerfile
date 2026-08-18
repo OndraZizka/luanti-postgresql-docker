@@ -1,4 +1,4 @@
-FROM ondrejzizka/luanti-mineclonia AS luanti-mineclonia-mods
+FROM ondrejzizka/luanti-mineclonia:latest AS luanti-mineclonia-mods
 
 ## Ensure the build fails if any RUN command fails
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -163,6 +163,8 @@ RUN ./downloadAndInstallMod.sh rangeTonic/areas_helper_tools/releases/34790
 RUN ./downloadAndInstallMod.sh cheapie/areasprotector/releases/36144
 
 
-## To enable the mods, the `worlds/<name>/world.mt` needs to contain `load_file_<MODNAME> = true` for each.
+## To enable the mods, the `worlds/<name>/world.mt` needs to contain `load_mod_modname = mods/moddir`.  (Used to be `load_file_<MODNAME> = true`.)
 ## This prepares such list.
-RUN find /config/.minetest/mods/ -type d -maxdepth 1 | sed 's#/#load_file_#g' | sed 's#$# = true#' > enableAllMods-putTo-world.mt
+RUN find /config/.minetest/mods/ -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sed 's#.*#load_mod_& = mods/&#' > enableAllMods-putTo-world.mt
+
+## TODO - complete the dir path
