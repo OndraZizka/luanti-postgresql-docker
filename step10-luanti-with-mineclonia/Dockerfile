@@ -1,4 +1,4 @@
-FROM lscr.io/linuxserver/luanti:5.16.1 AS luanti-mineclonia
+FROM lscr.io/linuxserver/luanti:5.17.0 AS luanti-mineclonia
 
 # Ensure the build fails if any RUN command fails
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
