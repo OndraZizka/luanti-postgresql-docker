@@ -8,7 +8,7 @@ gameid = mineclonia
 
 world_name = DemoWorld
 
-default_privs = interact, shout, home, fast
+default_privs = interact, shout, home, fast, areas
 
 ## Privileges:
 ##
@@ -28,3 +28,5 @@ default_privs = interact, shout, home, fast
 ## shout        Allows the player to send chat messages that everyone can hear, regardless of their position in the world.
 ## teleport     Allows the player to teleport to any position in the world.
 ## worldedit    Allows the player to use the WorldEdit mod (if installed).
+##
+## areas        Allows protecting an area.
