@@ -132,7 +132,7 @@ RUN ./downloadAndInstallMod.sh bgstack15/mcl_ruby_stuff/releases/35536
 RUN ./downloadAndInstallMod.sh bgstack15/mcl_lapis_stuff/releases/35551
 RUN ./downloadAndInstallMod.sh MatthiasZM96/mcl_backpack/releases/23507
 ## A couple of things, especially, pale oak (white wood).
-RUN ./downloadAndInstallMod.sh m16b/m16b_new_mobs/releases/36006
+#RUN ./downloadAndInstallMod.sh m16b/m16b_new_mobs/releases/36006  ## Pale oak is already in Mineclonia.
 ## A boat for lava.
 RUN ./downloadAndInstallMod.sh bgstack15/molten_sailor_mcl/releases/35447
 ## Some more music discs.
@@ -167,4 +167,6 @@ RUN ./downloadAndInstallMod.sh cheapie/areasprotector/releases/36144
 ## This prepares such list.
 RUN find /config/.minetest/mods/ -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sed 's#.*#load_mod_& = mods/&#' > enableAllMods-putTo-world.mt
 
-## TODO - complete the dir path
+
+FROM luanti-mineclonia-mods AS luanti-mineclonia-mods-debug
+#RUN apk add --no-cache mc  ## For debugging - to see what is the final structure.
