@@ -78,6 +78,8 @@ RUN ./downloadAndInstallMod.sh mt-mods/xcompat/releases/35043
 RUN ./downloadAndInstallMod.sh mt-mods/mcl_extra_structures/releases/34000
 
 ## Animalia [WORKS with Mineclonia]
+### Depends: Creatura (mob AI/animation library)
+RUN ./downloadAndInstallMod.sh ElCeejo/creatura/releases/34130
 RUN ./downloadAndInstallMod.sh ElCeejo/animalia/releases/34128
 ## Everness  [for Minetest -> Incompatible + Redundant, FAILS]
 #RUN ./downloadAndInstallMod.sh SaKeL/everness/releases/30981
@@ -106,6 +108,8 @@ RUN ./downloadAndInstallMod.sh TX_Miner/mcl_better_end/releases/29849
 ## Ambience (Immersive Sounds for Mineclonia)
 RUN ./downloadAndInstallMod.sh TenPlus1/ambience/releases/38020
 ## Mineclonia Furniture & Decorations
+### Depends: Mineclonia Get Comfortable
+RUN ./downloadAndInstallMod.sh rudzik8/mcl_cozy/releases/33419
 RUN ./downloadAndInstallMod.sh rudzik8/mcl_decor/releases/35460
 ## Mineclonia Wieldlight (Dynamic lighting, off-hand compatible.) May cause server perf issues.
 #RUN ./downloadAndInstallMod.sh cora/mcl_wieldlight/releases/25501
@@ -120,6 +124,8 @@ RUN ./downloadAndInstallMod.sh Impulse/enchantments_extractor/releases/22596
 ## /custom_spawn clear: Clears the players custom spawn, making them use beds / world spawn again.
 RUN ./downloadAndInstallMod.sh aliaslion/custom_spawn/releases/36811
 RUN ./downloadAndInstallMod.sh camelia/farmtools/releases/32877
+### Depends: World Settings
+RUN ./downloadAndInstallMod.sh Codiac/world_settings/releases/32157
 RUN ./downloadAndInstallMod.sh Codiac/mcla_codihacks/releases/34713  ## !!! Many changes, could cause troubles !!!
 RUN ./downloadAndInstallMod.sh dougsouza26/jds_hollow_logs/releases/35648
 ## Creepers run away from wild foxes.
@@ -160,11 +166,13 @@ RUN ./downloadAndInstallMod.sh ShadowNinja/areas/releases/37877
 
 ### Simple Protection - area chunk protection, see RUN ./downloadAndInstallMod.sh Krock/simple_protection/
 #RUN ./downloadAndInstallMod.sh Krock/simple_protection/releases/14723
-### Funny tweaks of players' physics.
-RUN ./downloadAndInstallMod.sh wilkgr76/admin_toys/releases/363 \
+### Funny tweaks of players' physics. [Incompatible with Mineclonia - depends on `default` (Minetest Game core mod), REMOVED]
+#RUN ./downloadAndInstallMod.sh wilkgr76/admin_toys/releases/363
 
 ### A Luanti mod which aims to improve user experience with Area Protection Mod by adding tools for easier area manipulation.
 RUN ./downloadAndInstallMod.sh rangeTonic/areas_helper_tools/releases/34790
+### Depends: Basic Materials
+RUN ./downloadAndInstallMod.sh mt-mods/basic_materials/releases/23751
 RUN ./downloadAndInstallMod.sh cheapie/areasprotector/releases/36144
 
 
@@ -177,4 +185,4 @@ ENV LSIO_LUANTI_BASE_DIR=/config/.minetest
 COPY templates/template_main-config_minetest.conf $LSIO_LUANTI_BASE_DIR/main-config/minetest.conf
 
 #FROM luanti-mineclonia-easy AS luanti-mineclonia-easy-debug
-#RUN apk add --no-cache mc  ## For debugging - to see what is the final structure.
+RUN apk add --no-cache mc  ## For debugging - to see what is the final structure.
