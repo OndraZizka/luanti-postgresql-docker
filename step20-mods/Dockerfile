@@ -15,6 +15,9 @@ COPY ./downloadAndInstallMod.sh ./
 
 ## --- Mobs ---
 
+## Copper golem: Copper block and a carved pumpkin on top.
+RUN ./downloadAndInstallMod.sh nandology/copper_golem/releases/37835
+
 ## Mobs Redo API 2025-12-05
 ## 2025-06-19: Are all these redundant and in fact harmful?
 ## "Mineclonia features native, custom physics, pathfinding algorithms, and behaviors for its animals and monsters."
@@ -58,8 +61,13 @@ COPY ./downloadAndInstallMod.sh ./
 ### Simple Woodcutter [incompatible with Mineclonia]
 #RUN ./downloadAndInstallMod.sh luarocks/simple_woodcutter/releases/20594
 
+## Advanced Discovery Maps: A Topological and Telemetry Overhaul
+RUN ./downloadAndInstallMod.sh Koatl/advanced_discovery_maps/releases/36842
+
 
 ## --- Environment ---
+RUN ./downloadAndInstallMod.sh slad_tv/dynamic_biome_skies/releases/37861  ## Most likely for Mineclonia.
+
 ### X-Compat [LIBRARY]
 RUN ./downloadAndInstallMod.sh mt-mods/xcompat/releases/35043
 ### More Trees!
@@ -157,6 +165,9 @@ RUN ./downloadAndInstallMod.sh xyzshantaram/vl_copper_rails_recipes/releases/354
 
 ##  === Mods - server administration ===
 #RUN ./downloadAndInstallMod.sh ughy/whitelist/releases/35420 ## Not really useful - we want to be open.
+
+### A GUI for privileges administration. Open with /privman .
+RUN ./downloadAndInstallMod.sh Impulse/priviledges_manager/releases/38239
 
 ###  Protector Redo - .
 RUN ./downloadAndInstallMod.sh TenPlus1/protector/releases/37670
