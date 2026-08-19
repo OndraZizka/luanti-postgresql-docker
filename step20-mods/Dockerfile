@@ -176,9 +176,8 @@ RUN ./downloadAndInstallMod.sh mt-mods/basic_materials/releases/23751
 RUN ./downloadAndInstallMod.sh cheapie/areasprotector/releases/36144
 
 
-## To enable the mods, the `worlds/<name>/world.mt` needs to contain `load_mod_modname = mods/moddir`.  (Used to be `load_file_<MODNAME> = true`.)
-## This prepares such list.
-RUN find /config/.minetest/mods/ -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sed 's#.*#load_mod_& = mods/&#' > enableAllMods-putTo-world.mt
+## To enable a mod, `worlds/<name>/world.mt` needs `load_mod_<modname> = true`.
+RUN find /config/.minetest/mods/ -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sed 's#.*#load_mod_& = true#' > enableAllMods-putTo-world.mt
 
 FROM luanti-mineclonia-mods AS luanti-mineclonia-easy
 ENV LSIO_LUANTI_BASE_DIR=/config/.minetest
