@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Scan step20-mods/Dockerfile for lines calling ./downloadAndInstallMod.sh owner/repo/releases/<id>
+Scan step20-mods/Dockerfile for lines calling ./downloadAndInstallMod.sh
+with either owner/repo/releases/<id> or the full content.luanti.org URL
 Query GitHub API to find the latest release numeric id for each owner/repo and produce an updated Dockerfile
 Writes: step20-mods/Dockerfile.updated
 
@@ -19,7 +20,12 @@ OUT_FILE = DOCKERFILE + '.updated'
 GITHUB_API = 'https://api.github.com'
 TOKEN = os.environ.get('GITHUB_TOKEN')
 
-pattern = re.compile(r"(downloadAndInstallMod\.sh\s+)([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)/releases/(\d+)")
+pattern = re.compile(
+    r"(downloadAndInstallMod\.sh\s+)"
+    r"(?:https://content\.luanti\.org/packages/)?"
+    r"([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)/releases/(\d+)"
+    r"(?:/download/?)?"
+)
 
 headers = {'User-Agent': 'luanti-updater-script/1.0'}
 if TOKEN:
@@ -121,4 +127,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

@@ -1,10 +1,20 @@
 
 set -euo pipefail
 
-MOD_AUTHOR_AND_NAME_AND_RELEASE="$1"
-MOD_NAME=$(echo "$MOD_AUTHOR_AND_NAME_AND_RELEASE" | cut -d/ -f2)
+INPUT="$1"
 
-URL="https://content.luanti.org/packages/$MOD_AUTHOR_AND_NAME_AND_RELEASE/download/"
+if [[ "$INPUT" =~ ^https://content\.luanti\.org/packages/([^/]+)/([^/]+)/releases/([0-9]+)(/download)?/?$ ]]; then
+    MOD_AUTHOR_AND_NAME_AND_RELEASE="${BASH_REMATCH[1]}/${BASH_REMATCH[2]}/releases/${BASH_REMATCH[3]}"
+    URL="https://content.luanti.org/packages/$MOD_AUTHOR_AND_NAME_AND_RELEASE/download/"
+elif [[ "$INPUT" =~ ^[^/]+/[^/]+/releases/[0-9]+/?$ ]]; then
+    MOD_AUTHOR_AND_NAME_AND_RELEASE="${INPUT%/}"
+    URL="https://content.luanti.org/packages/$MOD_AUTHOR_AND_NAME_AND_RELEASE/download/"
+else
+    echo "ERROR: Expected owner/mod/releases/<id> or a full content.luanti.org release/download URL, got: $INPUT"
+    exit 1
+fi
+
+MOD_NAME=$(echo "$MOD_AUTHOR_AND_NAME_AND_RELEASE" | cut -d/ -f2)
 
 WORKDIR=$(mktemp -d)
 mkdir -p "$WORKDIR/mod"

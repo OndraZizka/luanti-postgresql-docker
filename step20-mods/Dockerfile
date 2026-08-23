@@ -85,6 +85,9 @@ RUN ./downloadAndInstallMod.sh mt-mods/xcompat/releases/35043
 ## Extra Structures  [for Mineclonia]
 RUN ./downloadAndInstallMod.sh mt-mods/mcl_extra_structures/releases/34000
 
+## Church [declares compatibility with Mineclonia]
+RUN ./downloadAndInstallMod.sh https://content.luanti.org/packages/SFENCE/church/releases/27926/download/
+
 ## Animalia [WORKS with Mineclonia]
 ### Depends: Creatura (mob AI/animation library)
 RUN ./downloadAndInstallMod.sh ElCeejo/creatura/releases/34130
