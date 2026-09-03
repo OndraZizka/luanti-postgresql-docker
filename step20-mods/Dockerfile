@@ -60,6 +60,7 @@ RUN ./downloadAndInstallMod.sh nandology/copper_golem/releases/37835
 #RUN ./downloadAndInstallMod.sh SilverSandstone/leads/releases/31637
 ### Simple Woodcutter [incompatible with Mineclonia]
 #RUN ./downloadAndInstallMod.sh luarocks/simple_woodcutter/releases/20594
+#RUN ./downloadAndInstallMod.sh Kindaglia/automated_chest/releases/34531
 
 ## Advanced Discovery Maps: A Topological and Telemetry Overhaul
 RUN ./downloadAndInstallMod.sh Koatl/advanced_discovery_maps/releases/36842
@@ -72,6 +73,9 @@ RUN ./downloadAndInstallMod.sh slad_tv/dynamic_biome_skies/releases/37861  ## Mo
 RUN ./downloadAndInstallMod.sh mt-mods/xcompat/releases/35043
 ### More Trees!
 #RUN ./downloadAndInstallMod.sh mt-mods/moretrees/releases/34573
+
+RUN ./downloadAndInstallMod.sh SilverSandstone/logspikes/releases/23088
+RUN ./downloadAndInstallMod.sh https://content.luanti.org/packages/_Krush/falling_trees/releases/36338/download/
 
 ## Other Worlds - asteroids - 2025-06-04
 #RUN ./downloadAndInstallMod.sh TenPlus1/other_worlds/releases/35854
