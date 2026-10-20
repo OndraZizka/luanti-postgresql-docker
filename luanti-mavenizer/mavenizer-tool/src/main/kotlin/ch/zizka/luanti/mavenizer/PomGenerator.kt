@@ -177,6 +177,7 @@ $scmBlock
                 <configuration>
                     <publishingServerId>central</publishingServerId>
                     <autoPublish>${modPomInfo.autoPublish}</autoPublish>
+                    <deploymentName>${modPomInfo.groupId}:${modPomInfo.artifactId}:${modPomInfo.version}</deploymentName>
                 </configuration>
             </plugin>
         </plugins>
