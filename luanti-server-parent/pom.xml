@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  EXPERIMENTAL parent POM for "a Luanti server image = base Mineclonia image + mods from Maven + config".
+
+  A server project declares:
+    - the mods, as dependencies of type `zip` (e.g. ch.zizka.luanti.tbook:living_villages:39539),
+    - settings, in either or both of these ways:
+        a) properties:
+             luanti.config.core.<setting>        ->  `<setting> = value`          in minetest.conf
+             luanti.config.mod.<modname>.<key>   ->  `<modname>.<key> = value`    in minetest.conf
+        b) minetest.conf fragment files, listed in the property `luanti.config.fragments`
+           (comma-separated; default: src/main/luanti/minetest.conf of the project; missing files are skipped).
+    Later wins: fragments in the listed order, then the properties. Comments in fragments are NOT carried over.
+
+  Projects can be layered: a "common" project sets shared settings (and sets luanti.skip=true as it builds no image),
+  and several "mod set" projects use it as parent, add mods, and override single settings.
+
+  What the build does:
+    generate-resources  maven-dependency-plugin copies the mod zips to target/luanti/mod-zips/<modname>.zip
+    process-resources   antrun builds the tree target/luanti/image/ :
+                          config/.minetest/mods/<modname>/        each zip unpacked (a single wrapping directory is stripped,
+                                                                  like downloadAndInstallMod.sh does)
+                          config/.minetest/worlds/<world>/world.mt  with `load_mod_<modname> = true` for every mod
+                          config/.minetest/main-config/minetest.conf  merged from fragments + properties
+                          enableAllMods-putTo-world.mt, defaults/luanti/world.mt, custom-cont-init.d/10-sync-luanti-world.sh
+                            - the same world sync as in step40-family-server: `worlds/` is usually a volume, which hides
+                              the baked-in world, so on every start the missing load_mod_* lines are added to its world.mt
+    package             docker-maven-plugin builds the image, adding the whole tree in one COPY layer
+
+  Usage in a server project:  mvn package            (builds the image)
+                              mvn package docker:push
+  Installing this parent itself:  mvn -Dluanti.skip=true install
+  Requires: bash and a JDK (`jar`) on the build machine, Docker with buildx.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ch.zizka.luanti</groupId>
+    <artifactId>luanti-server-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Luanti server parent (experimental)</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Image settings. -->
+        <luanti.base.image>ondrejzizka/luanti-mineclonia:latest</luanti.base.image>
+        <luanti.image.name>${project.artifactId}:${project.version}</luanti.image.name>
+        <luanti.docker.platform>linux/amd64</luanti.docker.platform>
+        <!-- Set to true in projects that build no image (e.g. a "common" layer), or on the command line. -->
+        <luanti.skip>false</luanti.skip>
+
+        <!-- World that gets created in the image. -->
+        <luanti.world.name>world</luanti.world.name>
+        <luanti.world.gameid>mineclonia</luanti.world.gameid>
+
+        <!-- minetest.conf fragments, merged in this order; ${project.basedir} is the basedir of the building project. -->
+        <luanti.config.fragments>${project.basedir}/src/main/luanti/minetest.conf</luanti.config.fragments>
+
+        <!-- Default core settings; override in the server project. -->
+        <luanti.config.core.default_game>mineclonia</luanti.config.core.default_game>
+
+        <!-- Where things are staged, and where they go in the image. -->
+        <luanti.staging.dir>${project.build.directory}/luanti</luanti.staging.dir>
+        <luanti.image.base.dir>config/.minetest</luanti.image.base.dir>
+
+        <version.docker-maven-plugin>0.46.0</version.docker-maven-plugin>
+        <version.maven-dependency-plugin>3.8.1</version.maven-dependency-plugin>
+        <version.maven-antrun-plugin>3.1.0</version.maven-antrun-plugin>
+    </properties>
+
+    <build>
+        <plugins>
+
+            <!-- 1. Fetch the mod zips (all dependencies of type zip), named <artifactId>.zip. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>${version.maven-dependency-plugin}</version>
+                <executions>
+                    <execution>
+                        <id>fetch-mods</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>copy-dependencies</goal></goals>
+                        <configuration>
+                            <skip>${luanti.skip}</skip>
+                            <includeTypes>zip</includeTypes>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>${luanti.staging.dir}/mod-zips</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 2. Unpack mods, generate world.mt, minetest.conf and the init script into the staging tree. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>${version.maven-antrun-plugin}</version>
+                <executions>
+                    <execution>
+                        <id>stage-image-content</id>
+                        <phase>process-resources</phase>
+                        <goals><goal>run</goal></goals>
+                        <configuration>
+                            <skip>${luanti.skip}</skip>
+                            <target>
+                                <property name="image" value="${luanti.staging.dir}/image"/>
+                                <property name="stage" value="${image}/${luanti.image.base.dir}"/>
+
+                                <!-- Mods, world.mt, and the files derived from it. -->
+                                <mkdir dir="${luanti.staging.dir}"/>
+                                <echo file="${luanti.staging.dir}/stage-mods.sh"><![CDATA[set -euo pipefail
+root="$1"; base="$2"; zips="$3"; gameid="$4"; worldname="$5"
+shopt -s dotglob nullglob
+
+mods="$root/$base/mods"
+worldmt="$root/$base/worlds/$worldname/world.mt"
+rm -rf "$root"; mkdir -p "$mods" "$zips" "$(dirname "$worldmt")"
+
+for zip in "$zips"/*.zip; do
+    name=$(basename "$zip" .zip)
+    tmp=$(mktemp -d)
+    echo " * Unpacking mod: $name"
+    (cd "$tmp" && jar xf "$zip")
+    entries=("$tmp"/*)
+    if [ "${#entries[@]}" -eq 1 ] && [ -d "${entries[0]}" ]; then
+        mv "${entries[0]}" "$mods/$name"      # single wrapping directory: use its content
+    else
+        mkdir "$mods/$name" && mv "$tmp"/* "$mods/$name"/    # flat zip
+    fi
+    rm -rf "$tmp"
+done
+
+{
+    echo "gameid = $gameid"
+    echo "world_name = $worldname"
+    echo "backend = sqlite3"
+    echo "auth_backend = sqlite3"
+    echo "player_backend = sqlite3"
+    echo "mod_storage_backend = sqlite3"
+    for d in "$mods"/*/; do
+        [ -d "$d" ] && echo "load_mod_$(basename "$d") = true"
+    done
+} > "$worldmt"
+
+grep '^load_mod_' "$worldmt" > "$root/enableAllMods-putTo-world.mt" || true
+mkdir -p "$root/defaults/luanti" && cp "$worldmt" "$root/defaults/luanti/world.mt"
+]]></echo>
+                                <exec executable="bash" failonerror="true">
+                                    <arg value="${luanti.staging.dir}/stage-mods.sh"/>
+                                    <arg value="${image}"/>
+                                    <arg value="${luanti.image.base.dir}"/>
+                                    <arg value="${luanti.staging.dir}/mod-zips"/>
+                                    <arg value="${luanti.world.gameid}"/>
+                                    <arg value="${luanti.world.name}"/>
+                                </exec>
+
+                                <!--
+                                  The properties luanti.config.core.* and luanti.config.mod.* as `key = value` lines. The XML format of
+                                  echoproperties + XSLT is used instead of the text format, because the latter is java.util.Properties
+                                  syntax (escapes `:`, non-ASCII...).
+                                -->
+                                <echoproperties destfile="${luanti.staging.dir}/config.xml" format="xml">
+                                    <propertyset>
+                                        <propertyref prefix="luanti.config.core."/>
+                                        <mapper type="glob" from="luanti.config.core.*" to="*"/>
+                                    </propertyset>
+                                    <propertyset>
+                                        <propertyref prefix="luanti.config.mod."/>
+                                        <mapper type="glob" from="luanti.config.mod.*" to="*"/>
+                                    </propertyset>
+                                </echoproperties>
+                                <echo file="${luanti.staging.dir}/config-to-conf.xsl"><![CDATA[<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:output method="text" encoding="UTF-8"/>
+  <xsl:template match="/properties">
+    <xsl:for-each select="property">
+      <xsl:sort select="@name"/>
+      <xsl:value-of select="concat(@name, ' = ', @value, '&#10;')"/>
+    </xsl:for-each>
+  </xsl:template>
+</xsl:stylesheet>]]></echo>
+                                <xslt in="${luanti.staging.dir}/config.xml"
+                                      out="${luanti.staging.dir}/config-from-properties.conf"
+                                      style="${luanti.staging.dir}/config-to-conf.xsl"/>
+
+                                <!-- minetest.conf = fragments in order, then the properties; the last assignment of a key wins. -->
+                                <mkdir dir="${stage}/main-config"/>
+                                <echo file="${luanti.staging.dir}/merge-conf.sh"><![CDATA[set -euo pipefail
+out="$1"; from_properties="$2"; IFS=',' read -ra fragments <<< "$3"
+{
+    for f in "${fragments[@]}"; do
+        f="${f#"${f%%[![:space:]]*}"}"; f="${f%"${f##*[![:space:]]}"}"
+        if [ -f "$f" ]; then echo " * Config fragment: $f" >&2; cat "$f"; echo; fi
+    done
+    cat "$from_properties"
+} | awk '
+    /^[[:space:]]*(#|$)/ { next }
+    { k = $0; sub(/[[:space:]]*=.*/, "", k); sub(/^[[:space:]]+/, "", k)
+      if (!(k in v)) order[n++] = k
+      v[k] = $0 }
+    END { for (i = 0; i < n; i++) print v[order[i]] }' > "$out"
+]]></echo>
+                                <exec executable="bash" failonerror="true">
+                                    <arg value="${luanti.staging.dir}/merge-conf.sh"/>
+                                    <arg value="${stage}/main-config/minetest.conf"/>
+                                    <arg value="${luanti.staging.dir}/config-from-properties.conf"/>
+                                    <arg value="${luanti.config.fragments}"/>
+                                </exec>
+
+                                <!-- World sync on every container start (LSIO custom-cont-init.d hook); see the header comment. -->
+                                <mkdir dir="${image}/custom-cont-init.d"/>
+                                <echo file="${image}/custom-cont-init.d/10-sync-luanti-world.sh"><![CDATA[#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+#
+# `worlds/` is typically volume-mounted for persistence, so anything baked
+# into worlds/<world>/world.mt at image build time is invisible at runtime -
+# Docker never merges image content into an already-populated bind mount.
+#
+# This script runs on every container start and keeps the persisted world.mt
+# in sync with the mods actually shipped in this image:
+#   - First run (no world.mt yet): seed it from the full baked-in default.
+#   - Subsequent runs: ADD any missing `load_mod_*` lines. Never removes or
+#     overwrites OTHER lines, so manual edits/privileges survive updates.
+
+set -euo pipefail
+
+WORLD_DIR="/config/.minetest/worlds/${luanti.world.name}"
+WORLD_MT="$WORLD_DIR/world.mt"
+DEFAULT_WORLD_MT="/defaults/luanti/world.mt"
+MODS_LIST="/enableAllMods-putTo-world.mt"
+
+mkdir -p "$WORLD_DIR"
+
+if [[ ! -f "$WORLD_MT" ]]; then
+    echo "[sync-luanti-world] No world.mt found at $WORLD_MT - seeding from image defaults."
+    cp "$DEFAULT_WORLD_MT" "$WORLD_MT"
+    exit 0
+fi
+
+echo "[sync-luanti-world] Syncing missing load_mod_* entries into existing $WORLD_MT"
+while IFS= read -r LINE; do
+    [[ -z "$LINE" ]] && continue
+    KEY="${LINE%% =*}"
+    if ! grep -q "^${KEY} *=" "$WORLD_MT"; then
+        echo "[sync-luanti-world] Adding missing entry: $LINE"
+        echo "$LINE" >> "$WORLD_MT"
+    fi
+done < "$MODS_LIST"
+]]></echo>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 3. The image: base image + the whole staged tree, copied in one go. -->
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>${version.docker-maven-plugin}</version>
+                <configuration>
+                    <skip>${luanti.skip}</skip>
+                    <images>
+                        <image>
+                            <name>${luanti.image.name}</name>
+                            <build>
+                                <from>${luanti.base.image}</from>
+                                <tags>
+                                    <tag>latest</tag>
+                                </tags>
+                                <!-- Needs BuildKit: the legacy builder discards everything written under the base image's VOLUME /config/.minetest. -->
+                                <buildx>
+                                    <platforms>
+                                        <platform>${luanti.docker.platform}</platform>
+                                    </platforms>
+                                </buildx>
+                                <assembly>
+                                    <name>luanti</name>
+                                    <targetDir>/</targetDir>
+                                    <exportTargetDir>false</exportTargetDir>
+                                    <inline>
+                                        <fileSets>
+                                            <fileSet>
+                                                <directory>${luanti.staging.dir}/image</directory>
+                                                <outputDirectory>.</outputDirectory>
+                                                <excludes>
+                                                    <exclude>custom-cont-init.d/**</exclude>
+                                                </excludes>
+                                            </fileSet>
+                                            <fileSet>
+                                                <directory>${luanti.staging.dir}/image/custom-cont-init.d</directory>
+                                                <outputDirectory>custom-cont-init.d</outputDirectory>
+                                                <fileMode>0755</fileMode>
+                                            </fileSet>
+                                        </fileSets>
+                                    </inline>
+                                </assembly>
+                            </build>
+                        </image>
+                    </images>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>build-image</id>
+                        <phase>package</phase>
+                        <goals><goal>build</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mineclonia + Living Villages; the common settings, with a few overrides. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>ch.zizka.luanti.sample</groupId>
+        <artifactId>luanti-server-sample-common</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../common/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>luanti-server-sample-modset-villages</artifactId>
+    <packaging>pom</packaging>
+
+    <properties>
+        <!-- The common layer builds no image; this one does. -->
+        <luanti.skip>false</luanti.skip>
+
+        <!-- Overrides of the common settings: by property... -->
+        <luanti.config.core.server_name>Luanti sample server - villages</luanti.config.core.server_name>
+        <luanti.config.core.default_privs>interact, shout</luanti.config.core.default_privs>
+        <!-- ...and in src/main/luanti/minetest.conf (applied after common's fragment; properties win over fragments). -->
+        <!-- Mod settings: luanti.config.mod.<modname>.<key> becomes `<modname>.<key>` in minetest.conf. -->
+        <luanti.config.mod.living_villages.debug>false</luanti.config.mod.living_villages.debug>
+    </properties>
+
+    <dependencies>
+        <!-- Mods: groupId ch.zizka.luanti.<contentdb author>, artifactId = package name, version = ContentDB release id. -->
+        <dependency>
+            <groupId>ch.zizka.luanti.tbook</groupId>
+            <artifactId>living_villages</artifactId>
+            <version>39539</version>
+            <type>zip</type>
+        </dependency>
+    </dependencies>
+</project>

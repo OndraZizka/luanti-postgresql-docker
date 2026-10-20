@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mineclonia without any extra mods; only the common settings. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>ch.zizka.luanti.sample</groupId>
+        <artifactId>luanti-server-sample-common</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../common/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>luanti-server-sample-modset-vanilla</artifactId>
+    <packaging>pom</packaging>
+
+    <properties>
+        <!-- The common layer builds no image; this one does. -->
+        <luanti.skip>false</luanti.skip>
+        <luanti.config.core.server_name>Luanti sample server - vanilla Mineclonia</luanti.config.core.server_name>
+    </properties>
+</project>

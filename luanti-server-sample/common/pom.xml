@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Settings shared by all mod sets of this sample. Builds no image itself.
+  Mod sets use this as their parent and add mods and/or override single settings.
+  Mods are better declared in the mod sets: they can only be added by children, not removed.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>ch.zizka.luanti</groupId>
+        <artifactId>luanti-server-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../../luanti-server-parent/pom.xml</relativePath>
+    </parent>
+
+    <groupId>ch.zizka.luanti.sample</groupId>
+    <artifactId>luanti-server-sample-common</artifactId>
+    <packaging>pom</packaging>
+
+    <properties>
+        <luanti.skip>true</luanti.skip>
+
+        <!-- Fragments: this layer's, then the mod set's own. The mod sets are siblings of this directory. -->
+        <luanti.config.fragments>${project.basedir}/../common/src/main/luanti/minetest.conf,${project.basedir}/src/main/luanti/minetest.conf</luanti.config.fragments>
+
+        <!-- Single settings can be properties... -->
+        <luanti.config.core.server_name>Luanti sample server</luanti.config.core.server_name>
+        <luanti.config.core.default_privs>interact, shout, home, fast</luanti.config.core.default_privs>
+        <!-- ...the rest is in common/src/main/luanti/minetest.conf. -->
+    </properties>
+</project>
