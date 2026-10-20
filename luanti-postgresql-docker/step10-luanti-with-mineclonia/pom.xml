@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Equivalent of step10-luanti-with-mineclonia/Dockerfile + build.sh -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>ch.zizka.luanti</groupId>
+        <artifactId>luanti-postgresql-docker</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>step10-luanti-with-mineclonia</artifactId>
+    <packaging>pom</packaging>
+
+    <properties>
+        <!-- 0.124.0; the Dockerfile has this as ARG, here a property (-DminecloniaUrl=...) -->
+        <minecloniaUrl>https://content.luanti.org/packages/ryvnf/mineclonia/releases/39338/download/</minecloniaUrl>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <configuration>
+                    <images>
+                        <image>
+                            <name>${docker.user}/luanti-mineclonia:latest</name>
+                            <build>
+                                <from>lscr.io/linuxserver/luanti:5.17.0</from>
+                                <!-- Needs BuildKit: the legacy builder discards everything written under the base image's VOLUME /config/.minetest. -->
+                                <buildx>
+                                    <platforms>
+                                        <platform>${docker.platform}</platform>
+                                    </platforms>
+                                </buildx>
+                                <!-- Ensure the build fails if any RUN command fails -->
+                                <shell>
+                                    <arg>/bin/bash</arg>
+                                    <arg>-o</arg>
+                                    <arg>pipefail</arg>
+                                    <arg>-c</arg>
+                                </shell>
+                                <runCmds>
+                                    <run><![CDATA[wget -O mineclonia.zip ${minecloniaUrl} && mkdir -p /config/.minetest/ && unzip mineclonia.zip -d /config/.minetest/games/ && rm mineclonia.zip]]></run>
+                                </runCmds>
+                            </build>
+                        </image>
+                    </images>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  EXPERIMENTAL: aggregator + shared config for building the step* images with the fabric8
+  docker-maven-plugin (io.fabric8:docker-maven-plugin). Each stepNN-* directory has its own pom.xml
+  which reproduces what that directory's Dockerfile + build.sh do (the Dockerfiles stay for now).
+
+  Usage (from this directory, or from any single step directory):
+    mvn docker:build                  # build all images, in module order
+    mvn docker:build docker:push      # build + push (needs `docker login`)
+    mvn docker:build -Ddocker.user=someoneelse
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ch.zizka.luanti</groupId>
+    <artifactId>luanti-postgresql-docker</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Luanti Docker images (experimental)</name>
+
+    <!-- Order matters: each step's base image is the previous step's output. -->
+    <modules>
+        <module>step10-luanti-with-mineclonia</module>
+        <module>step20-mods</module>
+        <module>step30-luanti-mineclonia-DemoWorld</module>
+        <module>step40-family-server</module>
+        <module>step90-luanti-with-postgresql</module>
+    </modules>
+
+    <properties>
+        <!-- Same as DOCKERHUB_USER in config/config.sh -->
+        <docker.user>ondrejzizka</docker.user>
+        <!-- Platform for the BuildKit (buildx) builds, which the steps need; see the step poms. -->
+        <docker.platform>linux/amd64</docker.platform>
+        <docker.maven.plugin.version>0.46.0</docker.maven.plugin.version>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>${docker.maven.plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Equivalent of step20-mods/Dockerfile + build.sh.
+  The Dockerfile is multi-stage; the stages become two chained images here:
+    1. luanti-mineclonia-mods  (stage luanti-mineclonia-mods)
+    2. luanti-mineclonia-easy  (stages luanti-mineclonia-easy; steps 30 and 40 are based on this one)
+  Note: build.sh tags only the final stage, as luanti-mineclonia-mods.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>ch.zizka.luanti</groupId>
+        <artifactId>luanti-postgresql-docker</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>step20-mods</artifactId>
+    <packaging>pom</packaging>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <configuration>
+                    <images>
+
+                        <!-- Stage: luanti-mineclonia-mods -->
+                        <image>
+                            <name>${docker.user}/luanti-mineclonia-mods:latest</name>
+                            <build>
+                                <from>${docker.user}/luanti-mineclonia:latest</from>
+                                <!-- Needs BuildKit: the legacy builder discards everything written under the base image's VOLUME /config/.minetest. -->
+                                <buildx>
+                                    <platforms>
+                                        <platform>${docker.platform}</platform>
+                                    </platforms>
+                                </buildx>
+                                <!-- Ensure the build fails if any RUN command fails -->
+                                <shell>
+                                    <arg>/bin/bash</arg>
+                                    <arg>-o</arg>
+                                    <arg>pipefail</arg>
+                                    <arg>-c</arg>
+                                </shell>
+                                <!-- Replaces the COPY instructions; paths are relative to the image root (WORKDIR is /). -->
+                                <assembly>
+                                    <name>files</name>
+                                    <targetDir>/</targetDir>
+                                    <exportTargetDir>false</exportTargetDir>
+                                    <inline>
+                                        <files>
+                                            <!-- World config template, will be copied when creating the "world" in further images. -->
+                                            <file>
+                                                <source>${project.basedir}/templates/template_world.mt</source>
+                                                <outputDirectory>templates</outputDirectory>
+                                                <fileMode>0644</fileMode>
+                                            </file>
+                                            <file>
+                                                <source>${project.basedir}/downloadAndInstallMod.sh</source>
+                                                <outputDirectory>.</outputDirectory>
+                                                <fileMode>0755</fileMode>
+                                            </file>
+                                        </files>
+                                    </inline>
+                                </assembly>
+
+                                <!--
+                                  Mods - environment - all should be compatible with Mineclonia.
+                                  Each RUN of the Dockerfile is one run entry; commented-out mods are kept as comments.
+                                -->
+                                <runCmds>
+
+                                    <!-- Mobs -->
+
+                                    <!-- Copper golem: Copper block and a carved pumpkin on top. -->
+                                    <run>./downloadAndInstallMod.sh nandology/copper_golem/releases/37835</run>
+
+                                    <!--
+                                      Mobs Redo API 2025-12-05
+                                      2025-06-19: Are all these redundant and in fact harmful?
+                                      "Mineclonia features native, custom physics, pathfinding algorithms, and behaviors for its animals and monsters."
+                                      All supposedly for the Minetest game; Mineclonia has its own. Safe to REMOVE.
+                                    <run>./downloadAndInstallMod.sh TenPlus1/mobs/releases/36381</run>
+                                      Depend:
+                                    <run>./downloadAndInstallMod.sh TenPlus1/mobs_monster/releases/36382</run>
+                                    <run>./downloadAndInstallMod.sh TenPlus1/mobs_animal/releases/36266</run>
+                                      Newly added 2025-12-18.
+                                    <run>./downloadAndInstallMod.sh TenPlus1/dmobs/releases/36326</run>
+                                    <run>./downloadAndInstallMod.sh TenPlus1/mobs_water/releases/33827</run>
+                                    <run>./downloadAndInstallMod.sh TenPlus1/nssb/releases/35638</run>
+                                    <run>./downloadAndInstallMod.sh TenPlus1/nssm/releases/36054</run>
+                                    <run>./downloadAndInstallMod.sh TenPlus1/nssm_extra/releases/36055</run>
+
+                                      Depends: Wilhelmines Animal World
+                                    <run>./downloadAndInstallMod.sh Liil/animalworld/releases/24027</run>
+                                      Newly added 2025-12-18.
+                                    <run>./downloadAndInstallMod.sh Liil/livingcavesmobs/releases/27187</run>
+                                    <run>./downloadAndInstallMod.sh Liil/livingdesert/releases/19548</run>
+                                    <run>./downloadAndInstallMod.sh Liil/livingfloatlands/releases/19550</run>
+                                    <run>./downloadAndInstallMod.sh Liil/livingjungle/releases/17565</run>
+                                    <run>./downloadAndInstallMod.sh Liil/livingnether/releases/26157</run>
+                                    <run>./downloadAndInstallMod.sh Liil/marinaramobs/releases/17222</run>
+
+                                      Too old? 2021
+                                    <run>./downloadAndInstallMod.sh DrPlamsa/flower_cow/releases/6179</run>
+                                    <run>./downloadAndInstallMod.sh DrPlamsa/guinea_pig/releases/6178</run>
+                                      2025
+                                    <run>./downloadAndInstallMod.sh TenPlus1/mobs_slimes/releases/36267</run>
+                                    <run>./downloadAndInstallMod.sh FreeLikeGNU/goblins/releases/33305</run>
+                                    -->
+
+
+                                    <!-- Utilities -->
+
+                                    <!--
+                                    <run>./downloadAndInstallMod.sh m16b/m16b_new_elytras/releases/32816</run>
+
+                                      Leads [Already included in Mineclonia.]
+                                    <run>./downloadAndInstallMod.sh SilverSandstone/leads/releases/31637</run>
+                                      Simple Woodcutter [incompatible with Mineclonia]
+                                    <run>./downloadAndInstallMod.sh luarocks/simple_woodcutter/releases/20594</run>
+                                    <run>./downloadAndInstallMod.sh Kindaglia/automated_chest/releases/34531</run>
+                                    -->
+
+                                    <!-- Advanced Discovery Maps: A Topological and Telemetry Overhaul -->
+                                    <run>./downloadAndInstallMod.sh Koatl/advanced_discovery_maps/releases/39066</run>
+
+
+                                    <!-- Environment -->
+                                    <!-- Most likely for Mineclonia. -->
+                                    <run>./downloadAndInstallMod.sh slad_tv/dynamic_biome_skies/releases/37861</run>
+
+                                    <!-- X-Compat [LIBRARY] -->
+                                    <run>./downloadAndInstallMod.sh mt-mods/xcompat/releases/35043</run>
+                                    <!--
+                                      More Trees!
+                                    <run>./downloadAndInstallMod.sh mt-mods/moretrees/releases/34573</run>
+                                    -->
+
+                                    <run>./downloadAndInstallMod.sh SilverSandstone/logspikes/releases/23088</run>
+                                    <run>./downloadAndInstallMod.sh https://content.luanti.org/packages/_Krush/falling_trees/releases/36338/download/</run>
+
+                                    <!--
+                                      Other Worlds - asteroids - 2025-06-04
+                                    <run>./downloadAndInstallMod.sh TenPlus1/other_worlds/releases/35854</run>
+
+
+                                      Library for Schematics [for Minetest -> Incompatible + Redundant - safe to REMOVE]
+                                    <run>./downloadAndInstallMod.sh Sokomine/handle_schematics/releases/5339</run>
+                                      Depends: Villages [for Minetest -> Incompatible + Redundant - safe to REMOVE]
+                                    <run>./downloadAndInstallMod.sh Sokomine/mg_villages/releases/20488</run>
+                                    -->
+
+                                    <!-- Extra Structures  [for Mineclonia] -->
+                                    <run>./downloadAndInstallMod.sh mt-mods/mcl_extra_structures/releases/34000</run>
+
+                                    <!-- Church [declares compatibility with Mineclonia] -->
+                                    <run>./downloadAndInstallMod.sh https://content.luanti.org/packages/SFENCE/church/releases/27926/download/</run>
+
+                                    <!-- Animalia [WORKS with Mineclonia] -->
+                                    <!-- Depends: Creatura (mob AI/animation library) -->
+                                    <run>./downloadAndInstallMod.sh ElCeejo/creatura/releases/34130</run>
+                                    <run>./downloadAndInstallMod.sh ElCeejo/animalia/releases/34128</run>
+
+                                    <!--
+                                      Everness  [for Minetest -> Incompatible + Redundant, FAILS]
+                                    <run>./downloadAndInstallMod.sh SaKeL/everness/releases/30981</run>
+
+                                      Stone-like Blocks [for Mineclonia]  Does not exist anymore?
+                                    <run>./downloadAndInstallMod.sh dougsouza26/stonelike_blocks/releases/27910</run>
+
+                                      Baked Clay  [for Minetest -> Incompatible + Redundant]
+                                    <run>./downloadAndInstallMod.sh TenPlus1/bakedclay/releases/36240</run>
+                                    -->
+
+                                    <!-- More Ores -->
+                                    <run>./downloadAndInstallMod.sh Calinou/moreores/releases/30151</run>
+
+                                    <!-- Better End [for Mineclonia] -->
+                                    <run>./downloadAndInstallMod.sh TX_Miner/mcl_better_end/releases/29849</run>
+
+
+                                    <!-- Silly stuff -->
+
+                                    <!--
+                                      AirUtils
+                                    <run>./downloadAndInstallMod.sh apercy/airutils/releases/35858</run>
+                                      Depends: Steampunk Blimp
+                                    <run>./downloadAndInstallMod.sh apercy/steampunk_blimp/releases/36216</run>
+                                    -->
+
+                                    <!-- Added 2026-06 -->
+                                    <!-- Ambience (Immersive Sounds for Mineclonia) -->
+                                    <run>./downloadAndInstallMod.sh TenPlus1/ambience/releases/38020</run>
+                                    <!-- Mineclonia Furniture and Decorations -->
+                                    <!-- Depends: Mineclonia Get Comfortable -->
+                                    <run>./downloadAndInstallMod.sh rudzik8/mcl_cozy/releases/33419</run>
+                                    <run>./downloadAndInstallMod.sh rudzik8/mcl_decor/releases/35460</run>
+                                    <!--
+                                      Mineclonia Wieldlight (Dynamic lighting, off-hand compatible.) May cause server perf issues.
+                                    <run>./downloadAndInstallMod.sh cora/mcl_wieldlight/releases/25501</run>
+                                    -->
+                                    <!-- Better - client-only. -->
+                                    <run>./downloadAndInstallMod.sh mt-mods/illumination/releases/36882</run>
+                                    <run>./downloadAndInstallMod.sh erlehmann/mcl_quick_harvest_replant/releases/20784</run>
+                                    <!--
+                                    <run>./downloadAndInstallMod.sh Codiac/mcl_3d_plants/releases/25501</run>  Does not exists? Instead:
+                                    -->
+                                    <run>./downloadAndInstallMod.sh Codiac/mcl_small_3d_plants/releases/35229</run>
+                                    <run>./downloadAndInstallMod.sh Impulse/enchantments_extractor/releases/22596</run>
+
+                                    <!--
+                                      /custom_spawn set: Sets the players (the one who ran the command) spawn to their current position.
+                                      /custom_spawn clear: Clears the players custom spawn, making them use beds / world spawn again.
+                                    -->
+                                    <run>./downloadAndInstallMod.sh aliaslion/custom_spawn/releases/36811</run>
+                                    <run>./downloadAndInstallMod.sh camelia/farmtools/releases/32877</run>
+                                    <!-- Depends: World Settings -->
+                                    <run>./downloadAndInstallMod.sh Codiac/world_settings/releases/32157</run>
+                                    <!-- !!! Many changes, could cause troubles !!! -->
+                                    <run>./downloadAndInstallMod.sh Codiac/mcla_codihacks/releases/34713</run>
+                                    <run>./downloadAndInstallMod.sh dougsouza26/jds_hollow_logs/releases/35648</run>
+                                    <!--
+                                      Creepers run away from wild foxes.
+                                      Smelt rotten flesh to leather.
+                                    -->
+                                    <run>./downloadAndInstallMod.sh cathisnothome/ofcath_flesctoleather/releases/36653</run>
+                                    <!-- Decorative wooden blocks. -->
+                                    <run>./downloadAndInstallMod.sh dougsouza26/mcl_mosaic_planks/releases/29126</run>
+                                    <!-- Decorative pedestal for items. -->
+                                    <run>./downloadAndInstallMod.sh m16b/m16b_item_displayed/releases/32425</run>
+                                    <!-- 3 more decorations of elytra. -->
+                                    <run>./downloadAndInstallMod.sh m16b/m16b_new_elytras/releases/32336</run>
+
+                                    <run>./downloadAndInstallMod.sh bgstack15/obsidian_extra/releases/31577</run>
+                                    <run>./downloadAndInstallMod.sh bgstack15/mcl_ruby_stuff/releases/35536</run>
+                                    <run>./downloadAndInstallMod.sh bgstack15/mcl_lapis_stuff/releases/35551</run>
+                                    <run>./downloadAndInstallMod.sh MatthiasZM96/mcl_backpack/releases/23507</run>
+                                    <!--
+                                      A couple of things, especially, pale oak (white wood).
+                                    <run>./downloadAndInstallMod.sh m16b/m16b_new_mobs/releases/36006</run>  Pale oak is already in Mineclonia.
+                                    -->
+                                    <!-- A boat for lava. -->
+                                    <run>./downloadAndInstallMod.sh bgstack15/molten_sailor_mcl/releases/35447</run>
+                                    <!-- Some more music discs. -->
+                                    <run>./downloadAndInstallMod.sh cora/mcla_goldberg/releases/24717</run>
+                                    <run>./downloadAndInstallMod.sh Thisaccountis42/mcl_jukebox_c418/releases/16485</run>
+                                    <run>./downloadAndInstallMod.sh TomCon/discovery_maps/releases/34183</run>
+                                    <!-- TODO: Set mcl_signs_editable = 1 or such. -->
+                                    <run>./downloadAndInstallMod.sh nandology/copper_golem/releases/37254</run>
+                                    <run>./downloadAndInstallMod.sh xyzshantaram/vl_copper_rails_recipes/releases/35438</run>
+
+
+                                    <!-- Mods - server administration -->
+                                    <!--
+                                    <run>./downloadAndInstallMod.sh ughy/whitelist/releases/35420</run>  Not really useful - we want to be open.
+                                    -->
+
+                                    <!-- A GUI for privileges administration. Open with /privman . -->
+                                    <run>./downloadAndInstallMod.sh Impulse/priviledges_manager/releases/38239</run>
+
+                                    <!-- Protector Redo -->
+                                    <run>./downloadAndInstallMod.sh TenPlus1/protector/releases/37670</run>
+
+                                    <!-- Areas - protection of areas -->
+                                    <run>./downloadAndInstallMod.sh ShadowNinja/areas/releases/37877</run>
+
+                                    <!--
+                                      Simple Protection - area chunk protection, see RUN ./downloadAndInstallMod.sh Krock/simple_protection/
+                                    <run>./downloadAndInstallMod.sh Krock/simple_protection/releases/14723</run>
+                                      Funny tweaks of players' physics. [Incompatible with Mineclonia - depends on `default` (Minetest Game core mod), REMOVED]
+                                    <run>./downloadAndInstallMod.sh wilkgr76/admin_toys/releases/363</run>
+                                    -->
+
+                                    <!-- A Luanti mod which aims to improve user experience with Area Protection Mod by adding tools for easier area manipulation. -->
+                                    <run>./downloadAndInstallMod.sh rangeTonic/areas_helper_tools/releases/34790</run>
+                                    <!-- Depends: Basic Materials -->
+                                    <run>./downloadAndInstallMod.sh mt-mods/basic_materials/releases/23751</run>
+                                    <run>./downloadAndInstallMod.sh cheapie/areasprotector/releases/36144</run>
+
+
+                                    <!-- To enable a mod, `worlds/NAME/world.mt` needs `load_mod_MODNAME = true`. -->
+                                    <run><![CDATA[find /config/.minetest/mods/ -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sed 's#.*#load_mod_& = true#' > enableAllMods-putTo-world.mt]]></run>
+                                </runCmds>
+                            </build>
+                        </image>
+
+                        <!-- Stage: luanti-mineclonia-easy (includes the former, commented-out, "easy-debug" stage's mc install) -->
+                        <image>
+                            <name>${docker.user}/luanti-mineclonia-easy:latest</name>
+                            <build>
+                                <from>${docker.user}/luanti-mineclonia-mods:latest</from>
+                                <buildx>
+                                    <platforms>
+                                        <platform>${docker.platform}</platform>
+                                    </platforms>
+                                </buildx>
+                                <shell>
+                                    <arg>/bin/bash</arg>
+                                    <arg>-o</arg>
+                                    <arg>pipefail</arg>
+                                    <arg>-c</arg>
+                                </shell>
+                                <env>
+                                    <LSIO_LUANTI_BASE_DIR>/config/.minetest</LSIO_LUANTI_BASE_DIR>
+                                </env>
+                                <assembly>
+                                    <name>files</name>
+                                    <targetDir>/</targetDir>
+                                    <exportTargetDir>false</exportTargetDir>
+                                    <inline>
+                                        <files>
+                                            <file>
+                                                <source>${project.basedir}/templates/template_main-config_minetest.conf</source>
+                                                <outputDirectory>config/.minetest/main-config</outputDirectory>
+                                                <destName>minetest.conf</destName>
+                                                <fileMode>0644</fileMode>
+                                            </file>
+                                        </files>
+                                    </inline>
+                                </assembly>
+                                <runCmds>
+                                    <!-- For debugging - to see what is the final structure. -->
+                                    <run>apk add --no-cache mc</run>
+                                </runCmds>
+                            </build>
+                        </image>
+
+                    </images>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

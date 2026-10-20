@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Equivalent of step90-luanti-with-postgresql/Dockerfile (there is no build.sh; image name is a guess) -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>ch.zizka.luanti</groupId>
+        <artifactId>luanti-postgresql-docker</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>step90-luanti-with-postgresql</artifactId>
+    <packaging>pom</packaging>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <configuration>
+                    <images>
+                        <image>
+                            <name>${docker.user}/luanti-mineclonia-postgresql:latest</name>
+                            <build>
+                                <from>${docker.user}/luanti-mineclonia:latest</from>
+                                <buildx>
+                                    <platforms>
+                                        <platform>${docker.platform}</platform>
+                                    </platforms>
+                                </buildx>
+                                <!--
+                                  This actually needs to be applied in the mounted volume, before booting the server.
+                                  RUN sed -i 's#^backend = .+#backend = postgresql#' /config/.minetest/worlds/world/world.mt
+                                  RUN echo 'pgsql_connection=user=postgres dbname=postgres' >> /config/.minetest/worlds/world/world.mt
+                                -->
+                            </build>
+                        </image>
+                    </images>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

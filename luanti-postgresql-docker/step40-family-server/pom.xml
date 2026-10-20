@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Equivalent of step40-family-server/Dockerfile + build.sh -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>ch.zizka.luanti</groupId>
+        <artifactId>luanti-postgresql-docker</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>step40-family-server</artifactId>
+    <packaging>pom</packaging>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <configuration>
+                    <images>
+                        <image>
+                            <name>${docker.user}/luanti-mineclonia-zizka:latest</name>
+                            <build>
+                                <from>${docker.user}/luanti-mineclonia-easy:latest</from>
+                                <buildx>
+                                    <platforms>
+                                        <platform>${docker.platform}</platform>
+                                    </platforms>
+                                </buildx>
+                                <env>
+                                    <!-- LSIO_LUANTI_BASE_DIR (/config/.minetest) is inherited from the base image. -->
+                                    <THIS_WORLD_DIR>$LSIO_LUANTI_BASE_DIR/worlds/world</THIS_WORLD_DIR>
+                                </env>
+                                <!-- Replaces the COPY instructions; paths are relative to the image root (WORKDIR is /). -->
+                                <assembly>
+                                    <name>files</name>
+                                    <targetDir>/</targetDir>
+                                    <exportTargetDir>false</exportTargetDir>
+                                    <inline>
+                                        <files>
+                                            <file>
+                                                <source>${project.basedir}/src/setValues.sh</source>
+                                                <outputDirectory>src</outputDirectory>
+                                                <fileMode>0755</fileMode>
+                                            </file>
+                                            <file>
+                                                <source>${project.basedir}/to-be-applied/minetest.conf</source>
+                                                <outputDirectory>to-be-applied</outputDirectory>
+                                                <fileMode>0644</fileMode>
+                                            </file>
+                                            <file>
+                                                <source>${project.basedir}/custom-cont-init.d/10-sync-luanti-world.sh</source>
+                                                <outputDirectory>custom-cont-init.d</outputDirectory>
+                                                <fileMode>0755</fileMode>
+                                            </file>
+                                        </files>
+                                    </inline>
+                                </assembly>
+                                <!-- Ensure the build fails if any RUN command fails -->
+                                <shell>
+                                    <arg>/bin/bash</arg>
+                                    <arg>-o</arg>
+                                    <arg>pipefail</arg>
+                                    <arg>-c</arg>
+                                </shell>
+                                <runCmds>
+                                    <run><![CDATA[mkdir -p "$THIS_WORLD_DIR" && cp /templates/template_world.mt "$THIS_WORLD_DIR/world.mt"]]></run>
+                                    <!-- Enable all mods for this world which is being prepared. -->
+                                    <run>echo "" >> "$THIS_WORLD_DIR/world.mt"</run>
+                                    <run>cat /enableAllMods-putTo-world.mt >> "$THIS_WORLD_DIR/world.mt"</run>
+                                    <run>src/setValues.sh to-be-applied/minetest.conf $LSIO_LUANTI_BASE_DIR/main-config/minetest.conf</run>
+                                    <!--
+                                      `worlds/` is normally volume-mounted at runtime, so anything baked into
+                                      $THIS_WORLD_DIR above is invisible once a persistent volume is attached.
+                                      Keep a copy in a path that is NOT under the volume mount, so the
+                                      custom-cont-init.d script can use it to seed/sync the real world.mt
+                                      on every container start.
+                                    -->
+                                    <run><![CDATA[mkdir -p /defaults/luanti && cp "$THIS_WORLD_DIR/world.mt" /defaults/luanti/world.mt]]></run>
+                                </runCmds>
+                            </build>
+                        </image>
+                    </images>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
