@@ -63,7 +63,7 @@ RUN ./downloadAndInstallMod.sh nandology/copper_golem/releases/37835
 #RUN ./downloadAndInstallMod.sh Kindaglia/automated_chest/releases/34531
 
 ## Advanced Discovery Maps: A Topological and Telemetry Overhaul
-RUN ./downloadAndInstallMod.sh Koatl/advanced_discovery_maps/releases/36842
+RUN ./downloadAndInstallMod.sh Koatl/advanced_discovery_maps/releases/39066
 
 
 ## --- Environment ---
