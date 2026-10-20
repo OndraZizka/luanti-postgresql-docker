@@ -1,0 +1,147 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ch.zizka.luanti.mods.tbook</groupId>
+    <artifactId>living_villages</artifactId>
+    <version>39539</version>
+    <packaging>pom</packaging>
+
+    <name>Living Villages</name>
+    <description>Daily lives for VoxeLibre villagers: sleep, births, fishing, and tavern dinners</description>
+    <url>https://content.luanti.org/packages/tbook/living_villages/</url>
+
+    <licenses>
+        <license>
+            <name>GPL-3.0-only</name>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>tbook</id>
+            <name>tbook</name>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/tbook/luanti-villages</url>
+        <connection>scm:git:https://github.com/tbook/luanti-villages</connection>
+    </scm>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <gpg.keyname>73BA361CA92D829800730DE207838E30786B5257</gpg.keyname>
+    </properties>
+
+    <build>
+        <plugins>
+            <!-- Download the ContentDB release zip. -->
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.6.8</version>
+                <executions>
+                    <execution>
+                        <id>download-mod</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>wget</goal></goals>
+                        <configuration>
+                            <url>https://content.luanti.org/packages/tbook/living_villages/releases/39539/download/</url>
+                            <outputFileName>mod.zip</outputFileName>
+                            <outputDirectory>${project.build.directory}/download</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <!-- Unpack the same zip (served from the plugin's download cache) to build the sources jar. -->
+                    <execution>
+                        <id>unpack-mod</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>wget</goal></goals>
+                        <configuration>
+                            <url>https://content.luanti.org/packages/tbook/living_villages/releases/39539/download/</url>
+                            <outputFileName>mod.zip</outputFileName>
+                            <outputDirectory>${project.build.directory}/mod-sources</outputDirectory>
+                            <unpack>true</unpack>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Pack the Lua sources (and license/text files) of the mod into a -sources.jar. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
+                <executions>
+                    <execution>
+                        <id>sources-jar</id>
+                        <phase>package</phase>
+                        <goals><goal>jar</goal></goals>
+                        <configuration>
+                            <classifier>sources</classifier>
+                            <classesDirectory>${project.build.directory}/mod-sources</classesDirectory>
+                            <includes>
+                                <include>**/*.lua</include>
+                                <include>**/*.md</include>
+                                <include>**/*.txt</include>
+                                <include>**/*.conf</include>
+                                <include>**/*.json</include>
+                                <include>**/LICENSE*</include>
+                                <include>**/COPYING*</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Attach the raw zip as the main (classifier-less) artifact of type "zip". -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.6.2</version>
+                <executions>
+                    <execution>
+                        <id>attach-mod-zip</id>
+                        <phase>package</phase>
+                        <goals><goal>attach-artifact</goal></goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/download/mod.zip</file>
+                                    <type>zip</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Sign the pom and the zip with GPG, required by Maven Central. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.2.8</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals><goal>sign</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Publish to Maven Central via the Central Portal Publisher API. -->
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.11.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <autoPublish>false</autoPublish>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
