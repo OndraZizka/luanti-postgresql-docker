@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit
 class RepoManager(
     private val workingDir: File,
     private val gpgKeyName: String,
+    private val localInstall: Boolean = false,
 ) {
     private val client = ContentDbClient()
     private val pomGen = PomGenerator()
@@ -23,12 +24,12 @@ class RepoManager(
         }
     }
 
-    /** Mavenize and deploy only the latest release of a single ContentDB package. */
-    fun syncOne(author: String, name: String) {
-        processPackage(author, name)
+    /** Mavenize and deploy a single ContentDB package: the given release, or the latest one if [releaseId] is null. */
+    fun syncOne(author: String, name: String, releaseId: Int? = null) {
+        processPackage(author, name, releaseId)
     }
 
-    private fun processPackage(author: String, name: String) {
+    private fun processPackage(author: String, name: String, releaseId: Int? = null) {
         val details = client.fetchPackageDetails(author, name)
         if (details == null) {
             println("Could not fetch details for $author/$name")
@@ -40,9 +41,10 @@ class RepoManager(
         val moduleDir = File(workingDir, "$author/$name")
         val contentDbUrl = "$contentDbBase/$author/$name/"
 
-        val latestRelease = details.releases.maxByOrNull { it.id }
+        val latestRelease = if (releaseId != null) details.releases.firstOrNull { it.id == releaseId }
+                            else details.releases.maxByOrNull { it.id }
         if (latestRelease == null) {
-            println("No releases found for $author/$name")
+            println("No ${if (releaseId != null) "release $releaseId" else "releases"} found for $author/$name")
             return
         }
 
@@ -75,7 +77,7 @@ class RepoManager(
     private fun deploy(moduleDir: File, version: String) {
         // GPG_PASSPHRASE is read by ~/.m2/settings.xml (gpg.passphrase = ${env.GPG_PASSPHRASE}).
         // It is never written to disk or passed as a command-line argument here.
-        val process = ProcessBuilder("mvn", "clean", "deploy", "-P", "ossrh")
+        val process = ProcessBuilder(if (localInstall) listOf("mvn", "clean", "install", "-Dgpg.skip=true") else listOf("mvn", "clean", "deploy", "-P", "ossrh"))
             .directory(moduleDir)
             .redirectErrorStream(true)
             .start()
