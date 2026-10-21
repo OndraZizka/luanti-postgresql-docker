@@ -13,12 +13,14 @@ class ContentDbClient {
     private val json = Json { ignoreUnknownKeys = true }
     private val baseUrl = "https://content.luanti.org/api"
 
-    fun fetchAllPackages(): List<Package> {
-        val request = Request.Builder().url("$baseUrl/packages/").build()
+    /** @param game optional `author/name` of a game, to only list packages supporting it, e.g. `ryvnf/mineclonia`. */
+    fun fetchAllPackages(game: String? = null): List<Package> {
+        val url = if (game != null) "$baseUrl/packages/?type=mod&game=$game" else "$baseUrl/packages/"
+        val request = Request.Builder().url(url).build()
         val response = client.newCall(request).execute()
         val body = response.body?.string() ?: return emptyList()
         return json.decodeFromString<List<Package>>(body)
-            .filter { it.type == "MOD" } // Only Mavenize MODs
+            .filter { it.type.equals("MOD", ignoreCase = true) } // Only Mavenize MODs
     }
 
     fun fetchPackageDetails(author: String, name: String): PackageDetails? {

@@ -14,9 +14,9 @@ class RepoManager(
     private val groupIdPrefix = "ch.zizka.luanti.mods"
     private val contentDbBase = "https://content.luanti.org/packages"
 
-    fun syncAll() {
+    fun syncAll(game: String? = null) {
         println("--- Starting Sync ---")
-        val packages = client.fetchAllPackages()
+        val packages = client.fetchAllPackages(game)
         println("Found ${packages.size} mods.")
 
         packages.forEach { pkg ->
