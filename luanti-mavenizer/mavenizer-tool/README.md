@@ -1,0 +1,66 @@
+# mavenizer-tool
+
+Turns [ContentDB](https://content.luanti.org) packages into Maven `zip` artifacts and (optionally) deploys them
+to Maven Central via the Sonatype Central Portal.
+
+## Coordinates
+
+| ContentDB          | Maven                                                  |
+|--------------------|--------------------------------------------------------|
+| mod `author/name`  | `ch.zizka.luanti.mods.<author>:<name>:<releaseId>`     |
+| game `author/name` | `ch.zizka.luanti.games.<author>:<name>:<releaseId>`    |
+
+The version is the ContentDB release id (see the `.N` suffix below). Characters outside `[A-Za-z0-9_.-]` become `_`.
+
+## Mavenizing
+
+```
+scripts/mavenize.sh [--local] <targets>
+```
+
+The script compiles the tool, builds the classpath and runs `ch.zizka.luanti.mavenizer.MainKt`.
+
+Targets:
+- `--game=ryvnf/mineclonia` - all mods supporting a game
+- `author/name` - latest release of a package
+- `author/name/releaseId` - a specific release
+
+For each package a POM is generated in `generated-mods-project/<author>/<name>/` and built. The POM carries the
+ContentDB metadata: description, license, developers/maintainers, issue tracker, SCM, and `luanti.*` properties
+(dev state, release date, tags, website, forum, donate URL, compatible games, mod.conf dependency names).
+The artifact is a zip that downloads the release from ContentDB.
+
+## Deploying
+
+- `--local` - `mvn install` into `~/.m2` (GPG skipped). Use this to try things out.
+- without it - `mvn deploy -P ossrh`, GPG-signed, published to Central. Set `MAVEN_GPG_PASSPHRASE` in the
+  environment (never in `settings.xml`).
+
+Ready-made scripts are in `../scripts/`: `deploy-mineclonia-mods.sh`, `deploy-family-server-mods.sh`
+(reads `family-server-mods.txt`). Both accept `--local`.
+
+**Central is immutable**: a published version can never be overwritten.
+
+## Dependencies
+
+Dependencies come from the ContentDB dependency API (`mod.conf` only has names).
+
+- **Mods**: required and optional mod dependencies become normal Maven `<dependency>` entries (type `zip`;
+  optional ones are `<optional>true</optional>`) at the dependency's latest release. A mod provided by a game the
+  package supports needs no entry. If several packages provide a name, the one named like the mod wins; anything
+  still ambiguous is listed in the `luanti.depends.unresolved` property.
+- **Not-yet-mavenized dependencies**: a package is deferred until its dependencies exist (in this run or in
+  `~/.m2`). If the tool can't progress, it lists what is missing in
+  `generated-mods-project/missing-dependencies.txt` (`author/name/release` lines). Feed that file's contents back
+  as targets to mavenize them, then re-run the rest.
+- **Games**: never mavenized by the tool. A compatible game is added as an *optional* dependency (under the
+  `<!-- Compatible games -->` comment) only if it is already in the local repository - install it yourself first
+  if you want it. All compatible games are always listed in the `luanti.games.compatible` property.
+
+## The `.N` version suffix
+
+If `<releaseId>` of a package is already on Maven Central (checked via `repo1.maven.org`), the tool generates
+`<releaseId>.1` instead, since the old POM cannot be replaced and lacks the metadata/dependencies. The same rule
+is applied to dependency versions written into POMs. Maven orders `37835 < 37835.1 < 37836`. New ContentDB
+releases get the plain id again, so the suffixes fade out over time. Central's mirror can lag after a fresh
+deploy; re-run later if a deploy fails with "already exists".
