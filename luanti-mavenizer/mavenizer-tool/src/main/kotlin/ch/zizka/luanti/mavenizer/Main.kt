@@ -20,13 +20,12 @@ fun main(args: Array<String>) {
     val packages = args.filter { !it.startsWith("--") }
     val manager = RepoManager(targetDir, gpgKeyName, local)
 
-    if (packages.isNotEmpty()) {
+    if (packages.isEmpty())
+        manager.syncAll(game)
+    else
         manager.syncAll(packages.map { arg ->
             val parts = arg.split("/")
             require(parts.size in 2..3) { "Expected <author>/<name>[/<releaseId>], got: $arg" }
             Triple(parts[0], parts[1], parts.getOrNull(2)?.toInt())
         })
-    } else {
-        manager.syncAll(game)
-    }
 }
