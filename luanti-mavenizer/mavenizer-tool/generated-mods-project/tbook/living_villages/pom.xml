@@ -194,8 +194,8 @@ inside a world's `worldmods` directory. Then enable it for your world.
         <luanti.release.date>2026-10-19</luanti.release.date>
         <luanti.tags>commerce, mapgen, mobs</luanti.tags>
         <luanti.games.compatible>Wuzzy/mineclone2, ryvnf/mineclonia</luanti.games.compatible>
-        <luanti.depends.required>mcl_torches, mcl_nether, mcl_fences, mcl_mangrove, mcl_cherry_blossom, mcl_title, mcl_core, mcl_farming, mcl_cozy, mcl_stairs, mcl_deepslate, mcl_player, mcl_wool, mcl_sounds, mcl_mobitems, playerphysics, mcl_bamboo, mcl_crimson</luanti.depends.required>
-        <luanti.depends.optional>mcl_lanterns, mcl_dyes, subtitles, screwdriver, mcl_lush_caves, mcl_dye</luanti.depends.optional>
+        <luanti.depends.required>mcl_mangrove, mcl_fences, mcl_crimson, mcl_wool, mcl_farming, playerphysics, mcl_deepslate, mcl_torches, mcl_cherry_blossom, mcl_core, mcl_nether, mcl_title, mcl_mobitems, mcl_bamboo, mcl_player, mcl_cozy, mcl_sounds, mcl_stairs</luanti.depends.required>
+        <luanti.depends.optional>mcl_lush_caves, screwdriver, mcl_lanterns, mcl_dye, subtitles, mcl_dyes</luanti.depends.optional>
     </properties>
 
     <build>
