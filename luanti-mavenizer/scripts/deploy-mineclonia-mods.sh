@@ -9,8 +9,8 @@ mvn -q -B compile dependency:build-classpath -Dmdep.outputFile=target/classpath.
 
 if [[ "${1:-}" != "--local" ]]; then
     export GPG_TTY=$(tty)
-    read -rsp "GPG passphrase: " GPG_PASSPHRASE; export GPG_PASSPHRASE; echo
-    trap 'unset GPG_PASSPHRASE' EXIT
+    read -rsp "GPG passphrase: " MAVEN_GPG_PASSPHRASE; export MAVEN_GPG_PASSPHRASE; echo
+    trap 'unset MAVEN_GPG_PASSPHRASE' EXIT
 fi
 
 java -cp "target/classes:$(cat target/classpath.txt)" ch.zizka.luanti.mavenizer.MainKt \

@@ -4,6 +4,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import ch.zizka.luanti.mavenizer.Package
+import ch.zizka.luanti.mavenizer.ModDependency
 import ch.zizka.luanti.mavenizer.PackageDetails
 import ch.zizka.luanti.mavenizer.Release
 
@@ -36,6 +37,20 @@ class ContentDbClient {
         } catch (e: Exception) {
             println("Error fetching details for $author/$name: ${e.message}")
             return null
+        }
+    }
+
+    /** Required and optional mods from mod.conf, with the ContentDB packages providing each of them. */
+    fun fetchDependencies(author: String, name: String): List<ModDependency> {
+        val request = Request.Builder().url("$baseUrl/packages/$author/$name/dependencies/").build()
+        try {
+            val response = client.newCall(request).execute()
+            if (!response.isSuccessful) return emptyList()
+            val body = response.body?.string() ?: return emptyList()
+            return json.decodeFromString<Map<String, List<ModDependency>>>(body).values.firstOrNull() ?: emptyList()
+        } catch (e: Exception) {
+            println("Error fetching dependencies for $author/$name: ${e.message}")
+            return emptyList()
         }
     }
 

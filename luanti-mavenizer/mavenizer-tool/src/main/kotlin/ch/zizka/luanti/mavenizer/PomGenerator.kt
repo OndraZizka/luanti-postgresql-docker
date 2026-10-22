@@ -25,15 +25,47 @@ data class ModPomInfo(
     val author: String,
     val gpgKeyName: String,
     val autoPublish: Boolean = false,
+    val longDescription: String? = null,
+    val website: String? = null,
+    val issueTrackerUrl: String? = null,
+    val forumUrl: String? = null,
+    val donateUrl: String? = null,
+    val devState: String? = null,
+    val releaseDate: String? = null,
+    val tags: List<String> = emptyList(),
+    val maintainers: List<String> = emptyList(),
+    val mediaLicense: String? = null,
+    /** Maven dependencies on the games this package supports; always rendered optional. */
+    val gameDependencies: List<PomDependency> = emptyList(),
+    /** All games the package supports as `author/name`, whether or not they are Maven dependencies. */
+    val compatibleGames: List<String> = emptyList(),
+    /** Maven dependencies on other ContentDB mods. */
+    val modDependencies: List<PomDependency> = emptyList(),
+    /** Raw mod names from mod.conf, kept as properties for reference. */
+    val requiredModNames: List<String> = emptyList(),
+    val optionalModNames: List<String> = emptyList(),
+    /** Human-readable notes on dependencies which could not be turned into Maven dependencies. */
+    val unresolvedDependencies: List<String> = emptyList(),
+)
+
+data class PomDependency(
+    val groupId: String,
+    val artifactId: String,
+    val version: String,
+    val optional: Boolean,
+    val type: String = "zip",
 )
 
 class PomGenerator {
 
     fun generatePom(modPomInfo: ModPomInfo, outputDir: File) {
+        val licenseUrl = modPomInfo.license
+            ?.takeIf { it.matches(Regex("[A-Za-z0-9.+-]+")) && !it.equals("other", ignoreCase = true) }
+            ?.let { "\n            <url>https://spdx.org/licenses/${escape(it)}.html</url>" } ?: ""
         val licenseBlock = if (modPomInfo.license != null) """
     <licenses>
         <license>
-            <name>${escape(modPomInfo.license)}</name>
+            <name>${escape(modPomInfo.license)}</name>$licenseUrl
         </license>
     </licenses>""" else ""
 
@@ -42,6 +74,62 @@ class PomGenerator {
         <url>${escape(modPomInfo.scmUrl)}</url>
         <connection>scm:git:${escape(modPomInfo.scmUrl)}</connection>
     </scm>""" else ""
+
+        val issueBlock = if (modPomInfo.issueTrackerUrl != null) """
+    <issueManagement>
+        <system>ContentDB / repository</system>
+        <url>${escape(modPomInfo.issueTrackerUrl)}</url>
+    </issueManagement>""" else ""
+
+        val developers = (listOf(modPomInfo.author) + modPomInfo.maintainers).distinct()
+            .joinToString("\n") { """
+        <developer>
+            <id>${escape(it)}</id>
+            <name>${escape(it)}</name>
+        </developer>""".trimStart('\n') }
+
+        fun prop(name: String, value: String?) =
+            if (value.isNullOrBlank()) "" else "\n        <$name>${escape(value)}</$name>"
+        val extraProps = listOf(
+            prop("luanti.dev.state", modPomInfo.devState),
+            prop("luanti.release.date", modPomInfo.releaseDate),
+            prop("luanti.website", modPomInfo.website),
+            prop("luanti.forum.url", modPomInfo.forumUrl),
+            prop("luanti.donate.url", modPomInfo.donateUrl),
+            prop("luanti.media.license", modPomInfo.mediaLicense),
+            prop("luanti.tags", modPomInfo.tags.joinToString(", ")),
+            prop("luanti.games.compatible", modPomInfo.compatibleGames.joinToString(", ")),
+            prop("luanti.depends.required", modPomInfo.requiredModNames.joinToString(", ")),
+            prop("luanti.depends.optional", modPomInfo.optionalModNames.joinToString(", ")),
+            prop("luanti.depends.unresolved", modPomInfo.unresolvedDependencies.joinToString("; ")),
+        ).joinToString("")
+
+        fun dep(d: PomDependency) = """
+        <dependency>
+            <groupId>${escape(d.groupId)}</groupId>
+            <artifactId>${escape(d.artifactId)}</artifactId>
+            <version>${escape(d.version)}</version>
+            <type>${d.type}</type>${if (d.optional) "\n            <optional>true</optional>" else ""}
+        </dependency>"""
+        val dependenciesBlock =
+            if (modPomInfo.gameDependencies.isEmpty() && modPomInfo.modDependencies.isEmpty()) ""
+            else buildString {
+                append("\n    <dependencies>")
+                if (modPomInfo.gameDependencies.isNotEmpty()) {
+                    append("\n        <!-- Compatible games -->")
+                    modPomInfo.gameDependencies.forEach { append(dep(it)) }
+                }
+                if (modPomInfo.modDependencies.isNotEmpty()) {
+                    append("\n\n        <!-- Mods -->")
+                    modPomInfo.modDependencies.forEach { append(dep(it)) }
+                }
+                append("\n    </dependencies>\n")
+            }
+
+        val fullDescription = listOfNotNull(
+            modPomInfo.description.takeIf { it.isNotBlank() },
+            modPomInfo.longDescription?.takeIf { it.isNotBlank() && it.trim() != modPomInfo.description.trim() },
+        ).joinToString("\n\n")
 
         val pomContent = """
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -55,21 +143,18 @@ class PomGenerator {
     <packaging>pom</packaging>
 
     <name>${escape(modPomInfo.title)}</name>
-    <description>${escape(modPomInfo.description)}</description>
+    <description>${escape(fullDescription)}</description>
     <url>${escape(modPomInfo.contentDbUrl)}</url>
 $licenseBlock
 
     <developers>
-        <developer>
-            <id>${escape(modPomInfo.author)}</id>
-            <name>${escape(modPomInfo.author)}</name>
-        </developer>
+$developers
     </developers>
-$scmBlock
-
+$scmBlock$issueBlock
+$dependenciesBlock
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <gpg.keyname>${modPomInfo.gpgKeyName}</gpg.keyname>
+        <gpg.keyname>${modPomInfo.gpgKeyName}</gpg.keyname>$extraProps
     </properties>
 
     <build>
