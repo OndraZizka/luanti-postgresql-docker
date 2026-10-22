@@ -4,6 +4,17 @@ import org.luanti.mavenizer.ContentDbClient
 import java.io.File
 import java.util.concurrent.TimeUnit
 
+/** ContentDB package types, with the ContentDB API name and the Maven groupId segment. */
+enum class PackageType(val apiName: String, val groupSegment: String) {
+    MOD("mod", "mods"),
+    GAME("game", "games"),
+    TEXTURE_PACK("txp", "texturepacks");
+
+    companion object {
+        fun fromApi(name: String?): PackageType? = entries.firstOrNull { it.apiName.equals(name, ignoreCase = true) }
+    }
+}
+
 class RepoManager(
     private val workingDir: File,
     private val gpgKeyName: String,
@@ -11,8 +22,7 @@ class RepoManager(
 ) {
     private val client = ContentDbClient()
     private val pomGen = PomGenerator()
-    private val groupIdPrefix = "ch.zizka.luanti.mods"
-    private val gameGroupIdPrefix = "ch.zizka.luanti.games"
+    private val groupIdPrefix = "ch.zizka.luanti"
     private val contentDbBase = "https://content.luanti.org/packages"
 
     private val processed = mutableSetOf<String>()
@@ -85,8 +95,8 @@ class RepoManager(
         println("--- ${missing.size} referenced packages not yet mavenized, listed in ${file.path} ---")
     }
 
-    private fun groupFor(author: String, isGame: Boolean) =
-        "${if (isGame) gameGroupIdPrefix else groupIdPrefix}.${sanitizeSegment(author)}"
+    private fun groupFor(author: String, type: PackageType) =
+        "$groupIdPrefix.${type.groupSegment}.${sanitizeSegment(author)}"
 
     private fun processPackage(request: Request): Outcome {
         val (author, packageName, releaseId) = request
@@ -96,8 +106,12 @@ class RepoManager(
             return Outcome.FAILED
         }
 
-        val isGame = details.type.equals("game", ignoreCase = true)
-        val groupId = groupFor(author, isGame)
+        val type = PackageType.fromApi(details.type)
+        if (type == null) {
+            println("Unsupported package type '${details.type}' of $author/$packageName")
+            return Outcome.FAILED
+        }
+        val groupId = groupFor(author, type)
         val artifactId = sanitizeSegment(packageName)
         val moduleDir = File(workingDir, "$author/$packageName")
         val contentDbUrl = "$contentDbBase/$author/$packageName/"
@@ -115,13 +129,16 @@ class RepoManager(
             return Outcome.DONE
         }
 
-        val resolved = if (isGame) ResolvedDependencies() else resolveDependencies(author, packageName, details)
+        val resolved =
+            if (type != PackageType.MOD) ResolvedDependencies()
+            else resolveDependencies(author, packageName, details)
+
         // Games are never mavenized by this tool. A game becomes a (formal, optional) dependency only if it is
         // already in the local repository; the full list of compatible games is kept in a POM property.
         val allGames = details.game_support.filter { it.supports && it.game.release != null }.associate {
             "${it.game.author}/${it.game.name}/${it.game.release}" to PomDependency(
-                groupFor(it.game.author, isGame = true), sanitizeSegment(it.game.name),
-                effectiveVersion(groupFor(it.game.author, isGame = true), sanitizeSegment(it.game.name),
+                groupFor(it.game.author, PackageType.GAME), sanitizeSegment(it.game.name),
+                effectiveVersion(groupFor(it.game.author, PackageType.GAME), sanitizeSegment(it.game.name),
                     it.game.release!!), optional = true)
         }
         val gameDeps = allGames.filter { (key, dep) -> isAvailable(key, dep) }
@@ -205,11 +222,11 @@ class RepoManager(
             val (depAuthor, depName) = candidate.split("/", limit = 2)
             val depDetails = client.fetchPackageDetails(depAuthor, depName)
             val depRelease = depDetails?.releases?.maxByOrNull { it.id }
-            if (depDetails == null || depRelease == null || !depDetails.type.equals("mod", ignoreCase = true)) {
+            if (depDetails == null || depRelease == null || PackageType.fromApi(depDetails.type) != PackageType.MOD) {
                 unresolved += "${dep.name}: $candidate is not a mavenizable mod"
                 continue
             }
-            val depGroup = groupFor(depAuthor, isGame = false)
+            val depGroup = groupFor(depAuthor, PackageType.MOD)
             val pomDep = PomDependency(depGroup, sanitizeSegment(depName),
                 effectiveVersion(depGroup, sanitizeSegment(depName), depRelease.id), optional = dep.is_optional)
             refs["$candidate/${depRelease.id}"] = pomDep
