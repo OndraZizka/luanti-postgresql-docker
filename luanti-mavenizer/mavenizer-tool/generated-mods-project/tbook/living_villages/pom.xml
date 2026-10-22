@@ -140,6 +140,7 @@
                 <configuration>
                     <publishingServerId>central</publishingServerId>
                     <autoPublish>false</autoPublish>
+                    <deploymentName>ch.zizka.luanti.mods.tbook:living_villages:39539</deploymentName>
                 </configuration>
             </plugin>
         </plugins>
