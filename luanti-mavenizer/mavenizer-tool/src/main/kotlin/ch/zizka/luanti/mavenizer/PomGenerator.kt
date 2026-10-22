@@ -35,7 +35,9 @@ data class ModPomInfo(
     val tags: List<String> = emptyList(),
     val maintainers: List<String> = emptyList(),
     val mediaLicense: String? = null,
-    /** Maven dependencies on the games this package supports; always rendered optional. */
+    /** Dummy package (games): the zip only holds a note, instead of the ContentDB download. */
+    val dummy: Boolean = false,
+    /** Maven dependencies on the games this package supports; rendered as one profile per game. */
     val gameDependencies: List<PomDependency> = emptyList(),
     /** All games the package supports as `author/name`, whether or not they are Maven dependencies. */
     val compatibleGames: List<String> = emptyList(),
@@ -112,18 +114,36 @@ class PomGenerator {
             <type>${d.type}</type>${if (d.optional) "\n            <optional>true</optional>" else ""}
         </dependency>"""
         val dependenciesBlock =
-            if (modPomInfo.gameDependencies.isEmpty() && modPomInfo.modDependencies.isEmpty()) ""
+            if (modPomInfo.modDependencies.isEmpty()) ""
             else buildString {
-                append("\n    <dependencies>")
-                if (modPomInfo.gameDependencies.isNotEmpty()) {
-                    append("\n        <!-- Compatible games -->")
-                    modPomInfo.gameDependencies.forEach { append(dep(it)) }
-                }
-                if (modPomInfo.modDependencies.isNotEmpty()) {
-                    append("\n\n        <!-- Mods -->")
-                    modPomInfo.modDependencies.forEach { append(dep(it)) }
-                }
+                append("\n    <dependencies>\n        <!-- Mods -->")
+                modPomInfo.modDependencies.forEach { append(dep(it)) }
                 append("\n    </dependencies>\n")
+            }
+
+        // Games sit in profiles, so that a missing game never breaks the build of the mod.
+        val profilesBlock =
+            if (modPomInfo.gameDependencies.isEmpty()) ""
+            else buildString {
+                append("\n    <!-- Compatible games: activate one with -Dluanti.game=<author>/<name> -->\n    <profiles>")
+                modPomInfo.gameDependencies.forEach { g ->
+                    val gameKey = "${g.groupId.substringAfterLast('.')}/${g.artifactId}"
+                    append("""
+        <profile>
+            <id>game-${escape(g.groupId.substringAfterLast('.'))}-${escape(g.artifactId)}</id>
+            <activation>
+                <property>
+                    <name>luanti.game</name>
+                    <value>${escape(gameKey)}</value>
+                </property>
+            </activation>
+            <dependencies>
+                <!-- Compatible game -->""" + dep(g).replace("\n", "\n        ") + """
+
+            </dependencies>
+        </profile>""")
+                }
+                append("\n    </profiles>\n")
             }
 
         val fullDescription = listOfNotNull(
@@ -131,35 +151,7 @@ class PomGenerator {
             modPomInfo.longDescription?.takeIf { it.isNotBlank() && it.trim() != modPomInfo.description.trim() },
         ).joinToString("\n\n")
 
-        val pomContent = """
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <groupId>${modPomInfo.groupId}</groupId>
-    <artifactId>${modPomInfo.artifactId}</artifactId>
-    <version>${modPomInfo.version}</version>
-    <packaging>pom</packaging>
-
-    <name>${escape(modPomInfo.title)}</name>
-    <description>${escape(fullDescription)}</description>
-    <url>${escape(modPomInfo.contentDbUrl)}</url>
-$licenseBlock
-
-    <developers>
-$developers
-    </developers>
-$scmBlock$issueBlock
-$dependenciesBlock
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <gpg.keyname>${modPomInfo.gpgKeyName}</gpg.keyname>$extraProps
-    </properties>
-
-    <build>
-        <plugins>
-            <!-- Download the ContentDB release zip. -->
+        val downloadPlugins = """            <!-- Download the ContentDB release zip. -->
             <plugin>
                 <groupId>com.googlecode.maven-download-plugin</groupId>
                 <artifactId>download-maven-plugin</artifactId>
@@ -215,9 +207,8 @@ $dependenciesBlock
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-
-            <!-- Attach the raw zip as the main (classifier-less) artifact of type "zip". -->
+            </plugin>"""
+        val attachPlugin = """            <!-- Attach the raw zip as the main (classifier-less) artifact of type "zip". -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -230,14 +221,47 @@ $dependenciesBlock
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>${'$'}{project.build.directory}/download/mod.zip</file>
+                                    <file>${'$'}{attachedZip}</file>
                                     <type>zip</type>
                                 </artifact>
                             </artifacts>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>"""
+        val contentPlugins = (if (modPomInfo.dummy) "" else downloadPlugins + "\n\n") +
+            attachPlugin.replace("${'$'}{attachedZip}",
+                if (modPomInfo.dummy) "${'$'}{project.basedir}/placeholder.zip" else "${'$'}{project.build.directory}/download/mod.zip")
+
+        val pomContent = """
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>${modPomInfo.groupId}</groupId>
+    <artifactId>${modPomInfo.artifactId}</artifactId>
+    <version>${modPomInfo.version}</version>
+    <packaging>pom</packaging>
+
+    <name>${escape(modPomInfo.title)}</name>
+    <description>${escape(fullDescription)}</description>
+    <url>${escape(modPomInfo.contentDbUrl)}</url>
+$licenseBlock
+
+    <developers>
+$developers
+    </developers>
+$scmBlock$issueBlock
+$dependenciesBlock$profilesBlock
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <gpg.keyname>${modPomInfo.gpgKeyName}</gpg.keyname>$extraProps
+    </properties>
+
+    <build>
+        <plugins>
+$contentPlugins
 
             <!-- Sign the pom and the zip with GPG, required by Maven Central. -->
             <plugin>
@@ -272,6 +296,20 @@ $dependenciesBlock
 
         outputDir.mkdirs()
         File(outputDir, "pom.xml").writeText(pomContent)
+        if (modPomInfo.dummy) writePlaceholderZip(File(outputDir, "placeholder.zip"), modPomInfo)
+    }
+
+    private fun writePlaceholderZip(file: File, info: ModPomInfo) {
+        java.util.zip.ZipOutputStream(file.outputStream()).use { zip ->
+            zip.putNextEntry(java.util.zip.ZipEntry("PLACEHOLDER.txt").apply { time = 0 })
+            zip.write("""
+                This is a dummy package, published only so that the ContentDB package
+                ${info.contentDbUrl}
+                has a Maven coordinate (${info.groupId}:${info.artifactId}:${info.version}).
+                It does not contain the game itself - install the game separately, e.g. from ContentDB.
+            """.trimIndent().plus("\n").toByteArray())
+            zip.closeEntry()
+        }
     }
 
     private fun escape(s: String) = s

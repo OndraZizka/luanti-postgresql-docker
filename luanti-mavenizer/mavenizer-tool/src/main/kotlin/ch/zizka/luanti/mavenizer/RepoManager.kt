@@ -133,15 +133,14 @@ class RepoManager(
             if (type != PackageType.MOD) ResolvedDependencies()
             else resolveDependencies(author, packageName, details)
 
-        // Games are never mavenized by this tool. A game becomes a (formal, optional) dependency only if it is
-        // already in the local repository; the full list of compatible games is kept in a POM property.
+        // Each compatible game becomes a profile with a regular dependency, so it needn't exist for this build.
+        // Games are mavenized as dummy packages, only when asked for explicitly.
         val allGames = details.game_support.filter { it.supports && it.game.release != null }.associate {
             "${it.game.author}/${it.game.name}/${it.game.release}" to PomDependency(
                 groupFor(it.game.author, PackageType.GAME), sanitizeSegment(it.game.name),
                 effectiveVersion(groupFor(it.game.author, PackageType.GAME), sanitizeSegment(it.game.name),
-                    it.game.release!!), optional = true)
+                    it.game.release!!), optional = false)
         }
-        val gameDeps = allGames.filter { (key, dep) -> isAvailable(key, dep) }
         val refs = resolved.refs
         referenced.putAll(refs)
         val unavailable = refs.filter { (key, dep) -> !isAvailable(key, dep) }
@@ -174,7 +173,8 @@ class RepoManager(
                 tags = details.tags,
                 maintainers = details.maintainers,
                 mediaLicense = details.media_license?.takeIf { it != details.license },
-                gameDependencies = gameDeps.values.toList(),
+                gameDependencies = allGames.values.toList(),
+                dummy = type == PackageType.GAME,
                 compatibleGames = allGames.keys.map { it.substringBeforeLast('/') },
                 modDependencies = resolved.dependencies,
                 requiredModNames = resolved.requiredNames,

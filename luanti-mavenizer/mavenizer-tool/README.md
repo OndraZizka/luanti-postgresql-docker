@@ -53,9 +53,12 @@ Dependencies come from the ContentDB dependency API (`mod.conf` only has names).
   `~/.m2`). If the tool can't progress, it lists what is missing in
   `generated-mods-project/missing-dependencies.txt` (`author/name/release` lines). Feed that file's contents back
   as targets to mavenize them, then re-run the rest.
-- **Games**: never mavenized by the tool. A compatible game is added as an *optional* dependency (under the
-  `<!-- Compatible games -->` comment) only if it is already in the local repository - install it yourself first
-  if you want it. All compatible games are always listed in the `luanti.games.compatible` property.
+- **Games**: mavenized as *dummy* packages (`ch.zizka.luanti.games.<author>`): the zip holds only a
+  `PLACEHOLDER.txt` saying the game itself is not included, to avoid cluttering Central. A mod lists each compatible
+  game as a regular (non-optional) dependency inside its own profile, activated with
+  `-Dluanti.game=<author>/<name>`. Being in a profile, a game that is not installed never breaks the mod's build.
+  All compatible games are also in the `luanti.games.compatible` property.
+- Texture packs (`txp`) are supported as a package type too (`ch.zizka.luanti.texturepacks.<author>`).
 
 ## The `.N` version suffix
 
