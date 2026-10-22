@@ -8,6 +8,7 @@ import java.io.File
  *        mavenizer [--local]                                   -> crawl and sync all packages from ContentDB
  *        mavenizer [--local] --game=<author>/<name>            -> sync all mods supporting that game, e.g. --game=ryvnf/mineclonia
  *
+ * With --with-dependencies, the mod dependencies of the packages are mavenized first, recursively.
  * With --local, the artifacts are only installed into the local ~/.m2 instead of being deployed.
  */
 fun main(args: Array<String>) {
@@ -18,7 +19,7 @@ fun main(args: Array<String>) {
     val local = "--local" in args
     val game = args.firstOrNull { it.startsWith("--game=") }?.removePrefix("--game=")
     val packages = args.filter { !it.startsWith("--") }
-    val manager = RepoManager(targetDir, gpgKeyName, local)
+    val manager = RepoManager(targetDir, gpgKeyName, local, "--with-dependencies" in args)
 
     if (packages.isEmpty())
         manager.syncAll(game)

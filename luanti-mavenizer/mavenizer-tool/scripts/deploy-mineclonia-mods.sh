@@ -4,7 +4,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$HERE/../mavenizer-tool"
+cd "$HERE/.."
 mvn -q -B compile dependency:build-classpath -Dmdep.outputFile=target/classpath.txt
 
 if [[ "${1:-}" != "--local" ]]; then

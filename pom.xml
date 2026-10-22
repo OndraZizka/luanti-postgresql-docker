@@ -9,6 +9,6 @@
     <name>Luanti Toolkit</name>
 
     <modules>
-        <module>luanti-mavenizer</module>
+        <module>luanti-mavenizer/mavenizer-tool</module>
     </modules>
 </project>

@@ -19,13 +19,17 @@ class RepoManager(
     private val workingDir: File,
     private val gpgKeyName: String,
     private val localInstall: Boolean = false,
+    private val withDependencies: Boolean = false,
 ) {
     private val client = ContentDbClient()
     private val pomGen = PomGenerator()
     private val groupIdPrefix = "ch.zizka.luanti"
     private val contentDbBase = "https://content.luanti.org/packages"
 
-    private val processed = mutableSetOf<String>()
+    private val processed = mutableSetOf<String>()   // "author/name/release" mavenized in this run
+    private val failed = mutableSetOf<String>()
+    private val inProgress = mutableSetOf<String>()   // "author/name", for cycle detection
+    private var targets = emptySet<String>()          // "author/name" of the packages asked for
     private val referenced = sortedMapOf<String, PomDependency>() // "author/name/release" -> its Maven coordinates
     private val localRepo = File(System.getProperty("user.home"), ".m2/repository")
 
@@ -49,7 +53,7 @@ class RepoManager(
         return if (isOnCentral(group, artifact, plain)) "$plain.1" else plain
     }
 
-    private enum class Outcome { DONE, DEFERRED, FAILED }
+    private enum class Outcome { DONE, FAILED }
 
     private data class Request(val author: String, val name: String, val releaseId: Int? = null)
 
@@ -64,21 +68,14 @@ class RepoManager(
     fun syncAll(requests: List<Triple<String, String, Int?>>) = run(requests.map { Request(it.first, it.second, it.third) })
 
     /**
-     * A package whose dependencies are not available yet (neither in the local repository nor mavenized earlier
-     * in this run) is deferred until they are. What remains unavailable is listed in missing-dependencies.txt;
-     * the tool never mavenizes packages that were not asked for.
+     * Packages are mavenized depth-first: the unavailable dependencies of a package (neither in the local repository
+     * nor mavenized earlier in this run) are mavenized before it. Only dependencies which were asked for are
+     * followed, unless withDependencies is set. A package left with unavailable dependencies is skipped, and those
+     * are listed in missing-dependencies.txt.
      */
     private fun run(requests: List<Request>) {
-        var pending = requests
-        while (pending.isNotEmpty()) {
-            val deferred = pending.filter { processPackage(it) == Outcome.DEFERRED }
-            if (deferred.size == pending.size) {
-                println("--- ${deferred.size} packages left with unavailable dependencies: " +
-                    deferred.joinToString { "${it.author}/${it.name}" } + " ---")
-                break
-            }
-            pending = deferred
-        }
+        targets = requests.map { "${it.author}/${it.name}" }.toSet()
+        requests.forEach { processPackage(it) }
         writeMissingDependencies()
     }
 
@@ -111,27 +108,48 @@ class RepoManager(
             println("Unsupported package type '${details.type}' of $author/$packageName")
             return Outcome.FAILED
         }
-        val groupId = groupFor(author, type)
-        val artifactId = sanitizeSegment(packageName)
-        val moduleDir = File(workingDir, "$author/$packageName")
-        val contentDbUrl = "$contentDbBase/$author/$packageName/"
 
-        val latestRelease = if (releaseId != null) details.releases.firstOrNull { it.id == releaseId }
+        val release = if (releaseId != null) details.releases.firstOrNull { it.id == releaseId }
                             else details.releases.maxByOrNull { it.id }
-        if (latestRelease == null) {
+        if (release == null) {
             println("No ${if (releaseId != null) "release $releaseId" else "releases"} found for $author/$packageName")
             return Outcome.FAILED
         }
 
-        val version = effectiveVersion(groupId, artifactId, latestRelease.id)
+        val key = "$author/$packageName/${release.id}"
+        if (key in processed) return Outcome.DONE
+        if (key in failed) return Outcome.FAILED
+        inProgress += "$author/$packageName"
+        try {
+            return mavenize(details, type, release, key).also { if (it == Outcome.FAILED) failed += key }
+        } finally {
+            inProgress -= "$author/$packageName"
+        }
+    }
+
+    private fun mavenize(details: PackageDetails, type: PackageType, release: Release, key: String): Outcome {
+        val author = details.author
+        val packageName = details.name
+        val groupId = groupFor(author, type)
+        val artifactId = sanitizeSegment(packageName)
+        val moduleDir = File(workingDir, "$author/$packageName")
+        val contentDbUrl = "$contentDbBase/${urlSegment(author)}/${urlSegment(packageName)}/"
+        val version = effectiveVersion(groupId, artifactId, release.id)
         if (isDeployed(groupId, artifactId, version)) {
             println("$groupId:$artifactId:$version already deployed, skipping.")
             return Outcome.DONE
         }
 
-        val resolved =
+        val allResolved =
             if (type != PackageType.MOD) ResolvedDependencies()
             else resolveDependencies(author, packageName, details)
+        // Maven can't build a dependency cycle: the edge back to a package being mavenized is left out.
+        val cyclic = allResolved.refs.filterKeys { it.substringBeforeLast('/') in inProgress }
+        val resolved = if (cyclic.isEmpty()) allResolved else allResolved.copy(
+            dependencies = allResolved.dependencies.filter { d -> cyclic.values.none { it.groupId == d.groupId && it.artifactId == d.artifactId } },
+            refs = allResolved.refs - cyclic.keys,
+            unresolved = allResolved.unresolved + cyclic.keys.map { "${it.substringBeforeLast('/')}: left out, dependency cycle" },
+        )
 
         // Each compatible game becomes a profile with a regular dependency, so it needn't exist for this build.
         // Games are mavenized as dummy packages, only when asked for explicitly.
@@ -143,10 +161,13 @@ class RepoManager(
         }
         val refs = resolved.refs
         referenced.putAll(refs)
-        val unavailable = refs.filter { (key, dep) -> !isAvailable(key, dep) }
-        if (unavailable.isNotEmpty()) {
-            println("Deferring $author/$packageName: waiting for ${unavailable.keys}")
-            return Outcome.DEFERRED
+        for ((depKey, dep) in refs.filter { (k, d) -> !isAvailable(k, d) }) {
+            val (depAuthor, depName, depRelease) = depKey.split("/")
+            if (withDependencies || "$depAuthor/$depName" in targets) processPackage(Request(depAuthor, depName, depRelease.toInt()))
+            if (!isAvailable(depKey, dep)) {
+                println("Skipping $author/$packageName: dependency $depKey is not available")
+                return Outcome.FAILED
+            }
         }
 
         println(">>> New Version Found: $groupId:$artifactId:$version")
@@ -158,7 +179,7 @@ class RepoManager(
                 title = details.title ?: packageName,
                 description = details.short_description ?: (details.title ?: packageName),
                 contentDbUrl = contentDbUrl,
-                downloadUrl = "${contentDbUrl}releases/${latestRelease.id}/download/",
+                downloadUrl = "${contentDbUrl}releases/${release.id}/download/",
                 license = details.license,
                 scmUrl = details.repo,
                 author = author,
@@ -169,7 +190,7 @@ class RepoManager(
                 forumUrl = details.forum_url,
                 donateUrl = details.donate_url,
                 devState = details.dev_state,
-                releaseDate = latestRelease.release_date?.substringBefore('T'),
+                releaseDate = release.release_date?.substringBefore('T'),
                 tags = details.tags,
                 maintainers = details.maintainers,
                 mediaLicense = details.media_license?.takeIf { it != details.license },
@@ -184,11 +205,11 @@ class RepoManager(
             moduleDir,
         )
         if (!deploy(moduleDir, version)) return Outcome.FAILED
-        processed += "$author/$packageName/${latestRelease.id}"
+        processed += key
         return Outcome.DONE
     }
 
-    private class ResolvedDependencies(
+    private data class ResolvedDependencies(
         val dependencies: List<PomDependency> = emptyList(),
         val refs: Map<String, PomDependency> = emptyMap(),
         val requiredNames: List<String> = emptyList(),
@@ -265,6 +286,8 @@ class RepoManager(
     private fun isDeployed(g: String, a: String, v: String): Boolean {
         return false
     }
+
+    private fun urlSegment(s: String) = java.net.URLEncoder.encode(s, Charsets.UTF_8).replace("+", "%20")
 
     private fun sanitizeSegment(input: String) = input.replace(Regex("[^A-Za-z0-9_\\-.]"), "_")
 }
