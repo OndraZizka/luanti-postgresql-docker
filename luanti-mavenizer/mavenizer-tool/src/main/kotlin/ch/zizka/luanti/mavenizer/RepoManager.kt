@@ -92,7 +92,7 @@ class RepoManager(
         val file = File(workingDir, "missing-dependencies.txt")
         workingDir.mkdirs()
         file.writeText(missing.keys.joinToString("") { "$it\n" })
-        println("--- ${missing.size} referenced packages not yet mavenized, listed in ${file.path} ---")
+        println("--- ${missing.size} referenced packages not yet mavenized, listed in ${file.absolutePath} ---")
     }
 
     private fun groupFor(author: String, type: PackageType) =
