@@ -89,23 +89,23 @@ class RepoManager(
         "${if (isGame) gameGroupIdPrefix else groupIdPrefix}.${sanitizeSegment(author)}"
 
     private fun processPackage(request: Request): Outcome {
-        val (author, name, releaseId) = request
-        val details = client.fetchPackageDetails(author, name)
+        val (author, packageName, releaseId) = request
+        val details = client.fetchPackageDetails(author, packageName)
         if (details == null) {
-            println("Could not fetch details for $author/$name")
+            println("Could not fetch details for $author/$packageName")
             return Outcome.FAILED
         }
 
         val isGame = details.type.equals("game", ignoreCase = true)
         val groupId = groupFor(author, isGame)
-        val artifactId = sanitizeSegment(name)
-        val moduleDir = File(workingDir, "$author/$name")
-        val contentDbUrl = "$contentDbBase/$author/$name/"
+        val artifactId = sanitizeSegment(packageName)
+        val moduleDir = File(workingDir, "$author/$packageName")
+        val contentDbUrl = "$contentDbBase/$author/$packageName/"
 
         val latestRelease = if (releaseId != null) details.releases.firstOrNull { it.id == releaseId }
                             else details.releases.maxByOrNull { it.id }
         if (latestRelease == null) {
-            println("No ${if (releaseId != null) "release $releaseId" else "releases"} found for $author/$name")
+            println("No ${if (releaseId != null) "release $releaseId" else "releases"} found for $author/$packageName")
             return Outcome.FAILED
         }
 
@@ -115,7 +115,7 @@ class RepoManager(
             return Outcome.DONE
         }
 
-        val resolved = if (isGame) ResolvedDependencies() else resolveDependencies(author, name, details)
+        val resolved = if (isGame) ResolvedDependencies() else resolveDependencies(author, packageName, details)
         // Games are never mavenized by this tool. A game becomes a (formal, optional) dependency only if it is
         // already in the local repository; the full list of compatible games is kept in a POM property.
         val allGames = details.game_support.filter { it.supports && it.game.release != null }.associate {
@@ -129,7 +129,7 @@ class RepoManager(
         referenced.putAll(refs)
         val unavailable = refs.filter { (key, dep) -> !isAvailable(key, dep) }
         if (unavailable.isNotEmpty()) {
-            println("Deferring $author/$name: waiting for ${unavailable.keys}")
+            println("Deferring $author/$packageName: waiting for ${unavailable.keys}")
             return Outcome.DEFERRED
         }
 
@@ -139,8 +139,8 @@ class RepoManager(
                 groupId = groupId,
                 artifactId = artifactId,
                 version = version,
-                title = details.title ?: name,
-                description = details.short_description ?: (details.title ?: name),
+                title = details.title ?: packageName,
+                description = details.short_description ?: (details.title ?: packageName),
                 contentDbUrl = contentDbUrl,
                 downloadUrl = "${contentDbUrl}releases/${latestRelease.id}/download/",
                 license = details.license,
@@ -167,7 +167,7 @@ class RepoManager(
             moduleDir,
         )
         if (!deploy(moduleDir, version)) return Outcome.FAILED
-        processed += "$author/$name/${latestRelease.id}"
+        processed += "$author/$packageName/${latestRelease.id}"
         return Outcome.DONE
     }
 
