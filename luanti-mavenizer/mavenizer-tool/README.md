@@ -30,6 +30,18 @@ ContentDB metadata: description, license, developers/maintainers, issue tracker,
 (dev state, release date, tags, website, forum, donate URL, compatible games, mod.conf dependency names).
 The artifact is a zip that downloads the release from ContentDB.
 
+## Updating
+
+`--upgrade-existing=<source>` mavenizes new ContentDB releases (with their dependencies) of packages which are already
+mavenized. `<source>` is where the list of mavenized packages comes from:
+- `localRepo` - the packages installed under `ch.zizka.luanti.*` in `~/.m2`
+- `mavenCentral` - the packages published to Central (read from the `repo1.maven.org` directory listings)
+- `modsForGame` - the packages in `~/.m2` which support the game given by `--game=<author>/<name>`
+
+Add `--dry-run` to only list what would be upgraded, e.g. `scripts/mavenize.sh --upgrade-existing=mavenCentral --dry-run`.
+Add `--local` to install into `~/.m2` instead of deploying. Packages are matched through the ContentDB URL in their POMs.
+Central's mirror can lag behind a fresh deploy.
+
 ## Deploying
 
 - `--local` - `mvn install` into `~/.m2` (GPG skipped). Use this to try things out.

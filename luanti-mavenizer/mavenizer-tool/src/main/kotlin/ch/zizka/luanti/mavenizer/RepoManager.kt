@@ -15,11 +15,24 @@ enum class PackageType(val apiName: String, val groupSegment: String) {
     }
 }
 
+/** Where to take the list of already mavenized packages from. */
+enum class UpgradeSource(val argName: String) {
+    LOCAL_REPO("localRepo"),
+    MAVEN_CENTRAL("mavenCentral"),
+    /** The packages of the game given by --game which are in the local repository. */
+    MODS_FOR_GAME("modsForGame");
+
+    companion object {
+        fun fromArg(name: String) = entries.firstOrNull { it.argName == name }
+            ?: throw IllegalArgumentException("Expected one of ${entries.map { it.argName }}, got: $name")
+    }
+}
+
 class RepoManager(
     private val workingDir: File,
     private val gpgKeyName: String,
     private val localInstall: Boolean = false,
-    private val withDependencies: Boolean = false,
+    private var withDependencies: Boolean = false,
 ) {
     private val client = ContentDbClient()
     private val pomGen = PomGenerator()
@@ -66,6 +79,87 @@ class RepoManager(
 
     /** Mavenize and deploy the given packages: the given release, or the latest one if the release id is null. */
     fun syncAll(requests: List<Triple<String, String, Int?>>) = run(requests.map { Request(it.first, it.second, it.third) })
+
+    /**
+     * Looks up the already mavenized packages on ContentDB, and mavenizes the ones with a newer release
+     * (with their dependencies). With dryRun, it only reports them.
+     */
+    fun upgradeExisting(source: UpgradeSource, game: String?, dryRun: Boolean) {
+        val installed = when (source) {
+            UpgradeSource.LOCAL_REPO -> installedPackages()
+            UpgradeSource.MAVEN_CENTRAL -> centralPackages()
+            UpgradeSource.MODS_FOR_GAME -> {
+                requireNotNull(game) { "modsForGame needs --game=<author>/<name>" }
+                val ofGame = client.fetchAllPackages(game).map { "${it.author}/${it.name}" }.toSet()
+                installedPackages().filterKeys { it in ofGame }
+            }
+        }
+        println("--- Checking ${installed.size} mavenized packages (${source.argName}) against ContentDB ---")
+        val outdated = mutableListOf<Request>()
+        for ((pkg, installedRelease) in installed) {
+            val (author, name) = pkg.split("/", limit = 2)
+            val latest = client.fetchPackageDetails(author, name)?.releases?.maxOfOrNull { it.id }
+            when {
+                latest == null -> println("Not found on ContentDB: $pkg")
+                latest > installedRelease -> {
+                    println("Update: $pkg $installedRelease -> $latest")
+                    outdated += Request(author, name, latest)
+                }
+            }
+        }
+        println("--- ${outdated.size} of ${installed.size} packages have a newer release ---")
+        if (dryRun || outdated.isEmpty()) return
+        withDependencies = true
+        run(outdated)
+    }
+
+    /** "author/name" -> its highest installed release id, taken from the POMs of ch.zizka.luanti.* in the local repo. */
+    private fun installedPackages(): Map<String, Int> {
+        val result = sortedMapOf<String, Int>()
+        val urlRegex = Regex("<url>https://content\\.luanti\\.org/packages/([^/]+)/([^/]+)/</url>")
+        File(localRepo, "ch/zizka/luanti").walkTopDown()
+            .filter { it.isFile && it.extension == "pom" }
+            .forEach { pom ->
+                val release = pom.parentFile.name.substringBefore('.').toIntOrNull() ?: return@forEach
+                val match = urlRegex.find(pom.readText()) ?: return@forEach
+                val pkg = "${urlDecode(match.groupValues[1])}/${urlDecode(match.groupValues[2])}"
+                result.merge(pkg, release, ::maxOf)
+            }
+        return result
+    }
+
+    /**
+     * "author/name" -> highest release id published on Maven Central under ch.zizka.luanti.<type>.<author>,
+     * found through the directory listings and maven-metadata.xml of repo1.maven.org.
+     */
+    private fun centralPackages(): Map<String, Int> {
+        val base = "https://repo1.maven.org/maven2/ch/zizka/luanti"
+        fun get(url: String) = runCatching {
+            val response = http.send(java.net.http.HttpRequest.newBuilder(java.net.URI(url)).build(),
+                java.net.http.HttpResponse.BodyHandlers.ofString())
+            response.body().takeIf { response.statusCode() == 200 }
+        }.getOrNull()
+        fun subdirs(url: String) = Regex("href=\"([^\"/?.][^\"/]*)/\"").findAll(get(url) ?: "").map { it.groupValues[1] }.toList()
+
+        val result = sortedMapOf<String, Int>()
+        val urlRegex = Regex("<url>https://content\\.luanti\\.org/packages/([^/]+)/([^/]+)/</url>")
+        for (type in PackageType.entries) for (author in subdirs("$base/${type.groupSegment}/")) {
+            for (artifact in subdirs("$base/${type.groupSegment}/$author/")) {
+                val dir = "$base/${type.groupSegment}/$author/$artifact"
+                val versions = Regex("<version>([^<]+)</version>").findAll(get("$dir/maven-metadata.xml") ?: "")
+                    .map { it.groupValues[1] }.toList()
+                val latest = versions.filter { it.substringBefore('.').toIntOrNull() != null }
+                    .maxByOrNull { it.substringBefore('.').toInt() } ?: continue
+                val pom = get("$dir/$latest/$artifact-$latest.pom") ?: continue
+                val match = urlRegex.find(pom) ?: continue
+                result.merge("${urlDecode(match.groupValues[1])}/${urlDecode(match.groupValues[2])}",
+                    latest.substringBefore('.').toInt(), ::maxOf)
+            }
+        }
+        return result
+    }
+
+    private fun urlDecode(s: String) = java.net.URLDecoder.decode(s.replace("+", "%2B"), Charsets.UTF_8)
 
     /**
      * Packages are mavenized depth-first: the unavailable dependencies of a package (neither in the local repository
@@ -137,6 +231,7 @@ class RepoManager(
         val version = effectiveVersion(groupId, artifactId, release.id)
         if (isDeployed(groupId, artifactId, version)) {
             println("$groupId:$artifactId:$version already deployed, skipping.")
+            processed += key // counts as available for the packages depending on it
             return Outcome.DONE
         }
 
@@ -281,11 +376,8 @@ class RepoManager(
         return true
     }
 
-    // A simple heuristic to check if we already processed this.
-    // Ideally, query your Maven Repo (Nexus/Artifactory) API.
-    private fun isDeployed(g: String, a: String, v: String): Boolean {
-        return false
-    }
+    /** On Central the version can't be published again. Local installs are always redone, as they are cheap. */
+    private fun isDeployed(g: String, a: String, v: String) = !localInstall && isOnCentral(g, a, v)
 
     private fun urlSegment(s: String) = java.net.URLEncoder.encode(s, Charsets.UTF_8).replace("+", "%20")
 

@@ -8,6 +8,11 @@ import java.io.File
  *        mavenizer [--local]                                   -> crawl and sync all packages from ContentDB
  *        mavenizer [--local] --game=<author>/<name>            -> sync all mods supporting that game, e.g. --game=ryvnf/mineclonia
  *
+ *        mavenizer --upgrade-existing=localRepo|mavenCentral|modsForGame [--dry-run]
+ *                                                               -> mavenize new releases of packages already mavenized, as found in
+ *                                                               ~/.m2, on Maven Central, or (modsForGame, with --game) the ~/.m2
+ *                                                               packages supporting a game; --dry-run only lists them
+ *
  * With --with-dependencies, the mod dependencies of the packages are mavenized first, recursively.
  * With --local, the artifacts are only installed into the local ~/.m2 instead of being deployed.
  */
@@ -21,7 +26,10 @@ fun main(args: Array<String>) {
     val packages = args.filter { !it.startsWith("--") }
     val manager = RepoManager(targetDir, gpgKeyName, local, "--with-dependencies" in args)
 
-    if (packages.isEmpty())
+    val upgrade = args.firstOrNull { it.startsWith("--upgrade-existing=") }?.removePrefix("--upgrade-existing=")
+    if (upgrade != null)
+        manager.upgradeExisting(UpgradeSource.fromArg(upgrade), game, dryRun = "--dry-run" in args)
+    else if (packages.isEmpty())
         manager.syncAll(game)
     else
         manager.syncAll(packages.map { arg ->

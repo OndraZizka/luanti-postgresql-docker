@@ -16,7 +16,7 @@ fi
 mvn -q -B compile dependency:build-classpath -Dmdep.outputFile=target/classpath.txt
 
 local_only=false
-for a in "$@"; do [[ "$a" == "--local" ]] && local_only=true; done
+for a in "$@"; do [[ "$a" == "--local" || "$a" == "--dry-run" ]] && local_only=true; done
 
 if ! $local_only && [[ -z "${MAVEN_GPG_PASSPHRASE:-}" ]]; then
     export GPG_TTY=$(tty)

@@ -71,11 +71,15 @@ class PomGenerator {
         </license>
     </licenses>""" else ""
 
+        // Without a repository, the ContentDB page is the best pointer to the source (it has no SCM connection).
         val scmBlock = if (modPomInfo.scmUrl != null) """
     <scm>
         <url>${escape(modPomInfo.scmUrl)}</url>
         <connection>scm:git:${escape(modPomInfo.scmUrl)}</connection>
-    </scm>""" else ""
+    </scm>""" else """
+    <scm>
+        <url>${escape(modPomInfo.contentDbUrl)}</url>
+    </scm>"""
 
         val issueBlock = if (modPomInfo.issueTrackerUrl != null) """
     <issueManagement>
