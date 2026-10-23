@@ -5,20 +5,22 @@
     common/            shared settings (no image)                    <- parent: luanti-server-parent
     modset-vanilla/    Mineclonia, no mods                           <- parent: common
     modset-villages/   Mineclonia + Living Villages, a few overrides <- parent: common
+    modset-family/     Mineclonia + mods (step20) + demo world       <- parent: common
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ch.zizka.luanti.sample</groupId>
-    <artifactId>luanti-server-sample</artifactId>
+    <artifactId>luanti-server-samples</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Luanti server sample (experimental)</name>
+    <name>Luanti server samples (experimental)</name>
 
     <modules>
         <module>common</module>
         <module>modset-vanilla</module>
         <module>modset-villages</module>
+        <module>modset-family</module>
     </modules>
 </project>
