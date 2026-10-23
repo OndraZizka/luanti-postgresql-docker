@@ -28,11 +28,6 @@
 
     <dependencies>
         <!-- Mods: groupId ch.zizka.luanti.<contentdb author>, artifactId = package name, version = ContentDB release id. -->
-        <dependency>
-            <groupId>ch.zizka.luanti.tbook</groupId>
-            <artifactId>living_villages</artifactId>
-            <version>39539</version>
-            <type>zip</type>
-        </dependency>
+        <dependency><groupId>ch.zizka.luanti.tbook</groupId><artifactId>living_villages</artifactId><version>39539</version><type>zip</type></dependency>
     </dependencies>
 </project>
