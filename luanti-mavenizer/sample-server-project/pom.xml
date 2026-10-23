@@ -5,8 +5,8 @@
     <version>1.0.0</version>
 
     <dependencies>
-        <dependency><groupId>org.luanti.mods.tenplus1</groupId><artifactId>bakedclay</artifactId><version>31934</version><type>zip</type></dependency>
-        <dependency><groupId>org.luanti.mods.mesecons</groupId><artifactId>mesecons</artifactId><version>20230101</version><type>zip</type></dependency>
+        <dependency><groupId>ch.zizka.luanti.mods.TenPlus1</groupId><artifactId>bakedclay</artifactId><version>31934</version><type>zip</type></dependency>
+        <dependency><groupId>ch.zizka.luanti.mods.Jeija</groupId><artifactId>mesecons</artifactId><version>20230101</version><type>zip</type></dependency>
     </dependencies>
 
     <build>

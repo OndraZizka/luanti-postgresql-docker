@@ -35,6 +35,8 @@ fun main(args: Array<String>) {
         manager.syncAll(packages.map { arg ->
             val parts = arg.split("/")
             require(parts.size in 2..3) { "Expected <author>/<name>[/<releaseId>], got: $arg" }
-            Triple(parts[0], parts[1], parts.getOrNull(2)?.toInt())
+            val releaseId = parts.getOrNull(2)?.toIntOrNull()
+                ?: error("Expected a numeric release id in '<author>/<name>/<releaseId>', got: $arg")
+            Triple(parts[0], parts[1], releaseId)
         })
 }

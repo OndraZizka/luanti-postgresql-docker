@@ -1,12 +1,8 @@
-package org.luanti.mavenizer
+package ch.zizka.luanti.mavenizer
 
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import ch.zizka.luanti.mavenizer.Package
-import ch.zizka.luanti.mavenizer.ModDependency
-import ch.zizka.luanti.mavenizer.PackageDetails
-import ch.zizka.luanti.mavenizer.Release
 
 class ContentDbClient {
 

@@ -10,7 +10,8 @@ import java.time.Duration
 
 class ServerIntegrationTest {
 
-    // Must match the image name defined in your 'my-luanti-server' fabric8 configuration
+    // Must match the docker image built by luanti-mavenizer/sample-server-project
+    // (docker-maven-plugin <name>my-luanti-server</name> -> tag defaults to "latest").
     private val imageName = "my-luanti-server:latest"
 
     @Test
@@ -19,11 +20,11 @@ class ServerIntegrationTest {
         // 1. Configure Container
         val luantiServer = GenericContainer(DockerImageName.parse(imageName))
             .withImagePullPolicy(PullPolicy.defaultPolicy()) // Use local image if available
-            .withExposedPorts(30000) // UDP port (technically TCP here for mapping, but logs verify app)
+            .withExposedPorts(30000) // UDP port
             .withStartupTimeout(Duration.ofSeconds(60))
             // KEY STRATEGY: Wait for the log message that confirms the server loop started
             .waitingFor(
-                Wait.forLogMessage(".*Server started.*\\n", 1)
+                Wait.forLogMessage(".*Server started.*", 1)
             )
 
         try {

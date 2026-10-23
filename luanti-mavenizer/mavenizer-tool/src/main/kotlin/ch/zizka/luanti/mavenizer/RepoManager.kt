@@ -1,6 +1,5 @@
 package ch.zizka.luanti.mavenizer
 
-import org.luanti.mavenizer.ContentDbClient
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -238,6 +237,7 @@ class RepoManager(
         val allResolved =
             if (type != PackageType.MOD) ResolvedDependencies()
             else resolveDependencies(author, packageName, details)
+
         // Maven can't build a dependency cycle: the edge back to a package being mavenized is left out.
         val cyclic = allResolved.refs.filterKeys { it.substringBeforeLast('/') in inProgress }
         val resolved = if (cyclic.isEmpty()) allResolved else allResolved.copy(
@@ -368,7 +368,12 @@ class RepoManager(
 
         process.inputStream.bufferedReader().lines().forEach { println(it) }
         val completed = process.waitFor(10, TimeUnit.MINUTES)
-        if (!completed || process.exitValue() != 0) {
+        if (!completed) {
+            println("Timed out after 10m while deploying $moduleDir version $version")
+            process.destroy()
+            return false
+        }
+        if (process.exitValue() != 0) {
             println("Failed to deploy $moduleDir version $version")
             return false
         }
