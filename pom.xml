@@ -10,5 +10,6 @@
 
     <modules>
         <module>luanti-mavenizer/mavenizer-tool</module>
+        <module>luanti-mavenizer/integration-tests</module>
     </modules>
 </project>
